@@ -6,6 +6,8 @@ import com.ibm.event.oltp.EventContext
 import org.apache.spark.sql.types._
 
 object EventStoreSupport {
+
+  import com.lightbend.killrweather.settings.WeatherSettings._
   /*
   val weather_station = TableSchema("rweather_station", StructType(Array(
     StructField("id", StringType, nullable = false),
@@ -21,7 +23,7 @@ object EventStoreSupport {
     pkColumns = Seq("id")
   )
 */
-  val raw_weather_data = TableSchema("raw_weather_data", StructType(Array(
+  val raw_weather_data = TableSchema(RAWWEATHER, StructType(Array(
     StructField("wsid", StringType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -46,14 +48,14 @@ object EventStoreSupport {
     sortColumns=Seq(SortSpecification("timeStamp", ColumnOrder.AscendingNullsLast)),
     includeColumns=Seq("metricValue"))
 */
-  val sky_condition_lookup = TableSchema("sky_condition_lookup", StructType(Array(
+  val sky_condition_lookup = TableSchema(SKYCONDITIONSLOOKUP, StructType(Array(
     StructField("code", IntegerType, nullable = false),
     StructField("condition", StringType, nullable = false)
   )),
     shardingColumns = Seq("code"),
     pkColumns = Seq("code"))
 
-  val daily_aggregate_temperature = TableSchema("daily_aggregate_temperature", StructType(Array(
+  val daily_aggregate_temperature = TableSchema(DAYLYTEMP, StructType(Array(
     StructField("wsid", StringType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -67,7 +69,7 @@ object EventStoreSupport {
     shardingColumns = Seq("year", "month"),
     pkColumns = Seq("year", "month", "day"))
 
-  val daily_aggregate_windspeed = TableSchema("daily_aggregate_windspeed", StructType(Array(
+  val daily_aggregate_windspeed = TableSchema(DAYLYWIND, StructType(Array(
     StructField("wsid", StringType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -81,7 +83,7 @@ object EventStoreSupport {
     shardingColumns = Seq("year", "month"),
     pkColumns = Seq("year", "month", "day"))
 
-  val daily_aggregate_pressure = TableSchema("daily_aggregate_pressure", StructType(Array(
+  val daily_aggregate_pressure = TableSchema(DAYLYPRESS, StructType(Array(
     StructField("wsid", StringType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -95,7 +97,7 @@ object EventStoreSupport {
     shardingColumns = Seq("year", "month"),
     pkColumns = Seq("year", "month", "day"))
 
-  val daily_aggregate_precip = TableSchema("daily_aggregate_precip", StructType(Array(
+  val daily_aggregate_precip = TableSchema(DAYLYPRECIP, StructType(Array(
     StructField("wsid", StringType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -105,7 +107,7 @@ object EventStoreSupport {
     shardingColumns = Seq("year", "month"),
     pkColumns = Seq("year", "month", "day"))
 
-  val monthly_aggregate_temperature = TableSchema("monthly_aggregate_temperature", StructType(Array(
+  val monthly_aggregate_temperature = TableSchema(MONTHLYTEMP, StructType(Array(
     StructField("wsid", StringType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -118,7 +120,7 @@ object EventStoreSupport {
     shardingColumns = Seq("year"),
     pkColumns = Seq("year", "month"))
 
-  val monthly_aggregate_windspeed = TableSchema("monthly_aggregate_windspeed", StructType(Array(
+  val monthly_aggregate_windspeed = TableSchema(MONTHLYWIND, StructType(Array(
     StructField("wsid", StringType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -131,7 +133,7 @@ object EventStoreSupport {
     shardingColumns = Seq("year"),
     pkColumns = Seq("year", "month"))
 
-  val monthly_aggregate_pressure = TableSchema("monthly_aggregate_pressure", StructType(Array(
+  val monthly_aggregate_pressure = TableSchema(MONTHLYPRESS, StructType(Array(
     StructField("wsid", StringType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -144,7 +146,7 @@ object EventStoreSupport {
     shardingColumns = Seq("year"),
     pkColumns = Seq("year", "month"))
 
-  val monthly_aggregate_precip = TableSchema("monthly_aggregate_precip", StructType(Array(
+  val monthly_aggregate_precip = TableSchema(MONTHLYPRECIP, StructType(Array(
     StructField("wsid", StringType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -158,36 +160,56 @@ object EventStoreSupport {
     pkColumns = Seq("year", "month"))
 
   val tables = Map( //"weather_station" -> weather_station,
-    "raw_weather_data" -> raw_weather_data,
-    "sky_condition_lookup" -> sky_condition_lookup,
-    "daily_aggregate_temperature" -> daily_aggregate_temperature,
-    "daily_aggregate_windspeed" -> daily_aggregate_windspeed,
-    "daily_aggregate_pressure" -> daily_aggregate_pressure,
-    "daily_aggregate_precip" -> daily_aggregate_precip,
-    "monthly_aggregate_temperature" -> monthly_aggregate_temperature,
-    "monthly_aggregate_windspeed" -> monthly_aggregate_windspeed,
-    "monthly_aggregate_pressure" -> monthly_aggregate_pressure,
-    "monthly_aggregate_precip" -> monthly_aggregate_precip
+    RAWWEATHER -> raw_weather_data,
+    SKYCONDITIONSLOOKUP -> sky_condition_lookup,
+    DAYLYTEMP -> daily_aggregate_temperature,
+    DAYLYWIND -> daily_aggregate_windspeed,
+    DAYLYPRESS -> daily_aggregate_pressure,
+    DAYLYPRECIP -> daily_aggregate_precip,
+    MONTHLYTEMP -> monthly_aggregate_temperature,
+    MONTHLYWIND -> monthly_aggregate_windspeed,
+    MONTHLYPRESS -> monthly_aggregate_pressure,
+    MONTHLYPRECIP -> monthly_aggregate_precip
   )
 
-  val dbName = "KillrWeather"
   val eventStoreIP = "127.0.0.1"
-  val eventStorePort = "5555"
+  val eventStorePort = "1100"
 
   def createContext(): EventContext = {
     ConfigurationReader.setConnectionEndpoints(s"$eventStoreIP:$eventStorePort")
     try {
-      EventContext.createDatabase(dbName)
+      EventContext.createDatabase(DBNAME)
     } catch {
       case e: Throwable => {
-        EventContext.openDatabase(dbName)
+        EventContext.openDatabase(DBNAME)
         EventContext.getEventContext
       }
     }
   }
 
+  private def currentTables(ctx: EventContext) : List[String] = {
+
+    var tables : List[String] = List()
+    var success = false
+    var attempts = 0
+    while (!success || (attempts > RETRIES)) {
+      try {
+        attempts = attempts + 1
+        tables = ctx.getNamesOfTables.toList
+        success = true
+      }
+      catch {
+        case t: Throwable =>
+          println(s"Error getting existing tables")
+          Thread.sleep(10)
+      }
+    }
+    tables
+  }
+
   def ensureTables(ctx: EventContext): Unit = {
-    val existing = ctx.getNamesOfTables.toList
+
+    val existing = currentTables(ctx)
     println(s"Tables : ${existing.mkString(",")}")
     tables foreach (tabDef => {
       if (!existing.contains(tabDef._1)) {

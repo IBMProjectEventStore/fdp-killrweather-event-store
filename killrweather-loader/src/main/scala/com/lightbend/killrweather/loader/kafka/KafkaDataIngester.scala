@@ -17,13 +17,10 @@ object KafkaDataIngester {
 
   def main(args: Array[String]) {
 
-    val settings = new WeatherSettings()
+    import WeatherSettings._
 
-    import settings._
-
-    val brokers = if (args.length > 0) args(0) else kafkaBrokers
-    val ingester = KafkaDataIngester(brokers)
-    ingester.execute(file, settings.KafkaTopicRaw)
+    val ingester = KafkaDataIngester(kafkaBrokers)
+    ingester.execute(file, KafkaTopicRaw)
   }
 
   def pause(): Unit = {

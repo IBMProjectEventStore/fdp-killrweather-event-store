@@ -1,8 +1,11 @@
 package com.lightbend.killrweather.app.eventstore
 
-import com.ibm.event.oltp.EventContext
+import com.ibm.event.oltp.{EventContext, InsertResult}
 import com.lightbend.killrweather.EventStore.EventStoreSupport
 import org.apache.spark.sql.Row
+
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 object EventStoreSink {
 
@@ -21,50 +24,59 @@ object EventStoreSink {
 
 class EventStoreSink(createContext: () => EventContext) extends Serializable {
 
+  import com.lightbend.killrweather.settings.WeatherSettings._
+
   lazy val ctx = createContext()
 
   def writeRaw(raw: Iterator[Row]): Unit = {
-    val table = ctx.getTable("raw_weather_data")
-    raw.foreach(ctx.insert(table, _))
+    writeBatch(RAWWEATHER, raw)
   }
 
   def writeDailyTemperature(raw: Iterator[Row]): Unit = {
-    val table = ctx.getTable("daily_aggregate_temperature")
-    raw.foreach(ctx.insert(table, _))
+    writeBatch(DAYLYTEMP, raw)
   }
 
   def writeDailyWind(raw: Iterator[Row]): Unit = {
-    val table = ctx.getTable("daily_aggregate_windspeed")
-    raw.foreach(ctx.insert(table, _))
+    writeBatch(DAYLYWIND, raw)
   }
 
   def writeDailyPressure(raw: Iterator[Row]): Unit = {
-    val table = ctx.getTable("daily_aggregate_pressure")
-    raw.foreach(ctx.insert(table, _))
+    writeBatch(DAYLYPRESS, raw)
   }
 
   def writeDailyPresip(raw: Iterator[Row]): Unit = {
-    val table = ctx.getTable("daily_aggregate_precip")
-    raw.foreach(ctx.insert(table, _))
+    writeBatch(DAYLYPRECIP, raw)
   }
 
   def writeMothlyTemperature(raw: Iterator[Row]): Unit = {
-    val table = ctx.getTable("monthly_aggregate_temperature")
-    raw.foreach(ctx.insert(table, _))
+    writeBatch(MONTHLYTEMP, raw)
   }
 
   def writeMothlyWind(raw: Iterator[Row]): Unit = {
-    val table = ctx.getTable("monthly_aggregate_windspeed")
-    raw.foreach(ctx.insert(table, _))
+    writeBatch(MONTHLYWIND, raw)
   }
 
   def writeMothlyPressure(raw: Iterator[Row]): Unit = {
-    val table = ctx.getTable("monthly_aggregate_pressure")
-    raw.foreach(ctx.insert(table, _))
+    writeBatch(MONTHLYPRESS, raw)
   }
 
   def writeMothlyPresip(raw: Iterator[Row]): Unit = {
-    val table = ctx.getTable("monthly_aggregate_precip")
-    raw.foreach(ctx.insert(table, _))
+    writeBatch(MONTHLYPRECIP, raw)
+  }
+
+  private def writeBatch(tableName : String, data: Iterator[Row]) : Unit = {
+    val dataSeq = data.toIndexedSeq
+    if(dataSeq.size > 0) {
+      try {
+        val table = ctx.getTable(tableName)
+        val future: Future[InsertResult] = ctx.batchInsertAsync(table, dataSeq)
+        val result: InsertResult = Await.result(future, Duration.Inf)
+        if (result.failed) {
+          println(s"batch insert incomplete: $result")
+        }
+      }catch {
+        case t : Throwable => printf(s"Error writing to eventStore $t")
+      }
+    }
   }
 }

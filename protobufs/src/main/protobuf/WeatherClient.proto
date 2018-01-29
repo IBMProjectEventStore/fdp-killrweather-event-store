@@ -2,15 +2,6 @@ syntax = "proto3";
 
 package com.lightbend.killrweather;
 
-service WeatherListener {
-    // Sends a greeting
-    rpc GetWeatherReport (WeatherRecord) returns (Reply) {}
-}
-
-message Reply {
-    bool status = 1;
-}
-
 message WeatherRecord {
     string wsid = 1;
     int32 year = 2;
