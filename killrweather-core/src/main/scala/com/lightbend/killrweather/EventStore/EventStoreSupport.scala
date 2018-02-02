@@ -192,7 +192,7 @@ object EventStoreSupport {
     var tables : List[String] = List()
     var success = false
     var attempts = 0
-    while (!success || (attempts > RETRIES)) {
+    while (!success && (attempts < RETRIES)) {
       try {
         attempts = attempts + 1
         tables = ctx.getNamesOfTables.toList
