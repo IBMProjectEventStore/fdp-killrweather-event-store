@@ -12,7 +12,6 @@ object EventStoreSink {
   def apply(): EventStoreSink = {
     val f = () => {
       val ctx = EventStoreSupport.createContext()
-      EventStoreSupport.ensureTables(ctx)
       sys.addShutdownHook {
         EventContext.cleanUp()
       }

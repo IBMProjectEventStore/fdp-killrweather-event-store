@@ -25,6 +25,6 @@ object Versions {
   val Logback           = "1.2.3"
   val Scala             = "2.11.8"
   val Slf4j             = "1.7.16"
-  val Spark             = "2.1.0" //"2.2.0"
+  val Spark             = "2.1.0"
   val ScalaPBJSONVersion= "0.3.1"
 }

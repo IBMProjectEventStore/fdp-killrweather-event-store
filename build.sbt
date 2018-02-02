@@ -1,8 +1,8 @@
 import Dependencies._
 
-autoScalaLibrary := false
+//autoScalaLibrary := false
 
-libraryDependencies += "org.scala-lang" % "scala-library" % scalaVersion.value % "provided"
+//libraryDependencies += "org.scala-lang" % "scala-library" % scalaVersion.value % "provided"
 
 lazy val protobufs = (project in file("./protobufs"))
   .settings(
