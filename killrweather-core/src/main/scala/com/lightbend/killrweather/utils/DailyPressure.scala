@@ -8,6 +8,7 @@ case class DailyPressure(
   year: Int,
   month: Int,
   day: Int,
+  ts: Long,
   high: Double,
   low: Double,
   mean: Double,
@@ -17,7 +18,7 @@ case class DailyPressure(
 
 object DailyPressure {
   def apply(daily: DailyWeatherData): DailyPressure =
-    new DailyPressure(daily.wsid, daily.year, daily.month, daily.day, daily.highPressure, daily.lowPressure,
+    new DailyPressure(daily.wsid, daily.year, daily.month, daily.day, daily.ts, daily.highPressure, daily.lowPressure,
       daily.meanPressure, daily.variancePressure, daily.stdevPressure)
 }
 
@@ -25,6 +26,7 @@ case class MonthlyPressure(
   wsid: String,
   year: Int,
   month: Int,
+  ts: Long,
   high: Double,
   low: Double,
   mean: Double,
@@ -34,6 +36,6 @@ case class MonthlyPressure(
 
 object MonthlyPressure {
   def apply(monthly: MonthlyWeatherData): MonthlyPressure =
-    new MonthlyPressure(monthly.wsid, monthly.year, monthly.month, monthly.highPressure, monthly.lowPressure,
+    new MonthlyPressure(monthly.wsid, monthly.year, monthly.month, monthly.ts, monthly.highPressure, monthly.lowPressure,
       monthly.meanPressure, monthly.variancePressure, monthly.stdevPressure)
 }

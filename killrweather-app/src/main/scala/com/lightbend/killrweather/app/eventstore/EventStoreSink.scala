@@ -9,9 +9,9 @@ import scala.concurrent.{Await, Future}
 
 object EventStoreSink {
 
-  def apply(): EventStoreSink = {
+  def apply(eventStoreConfiguration: Option[String]): EventStoreSink = {
     val f = () => {
-      val ctx = EventStoreSupport.createContext()
+      val ctx = EventStoreSupport.createContext(eventStoreConfiguration)
       EventStoreSupport.ensureTables(ctx)
       sys.addShutdownHook {
         EventContext.cleanUp()

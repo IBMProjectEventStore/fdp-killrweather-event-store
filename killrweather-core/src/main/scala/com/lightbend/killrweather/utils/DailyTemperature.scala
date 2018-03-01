@@ -8,6 +8,7 @@ case class DailyTemperature(
   year: Int,
   month: Int,
   day: Int,
+  ts: Long,
   high: Double,
   low: Double,
   mean: Double,
@@ -16,7 +17,7 @@ case class DailyTemperature(
 ) extends Serializable
 object DailyTemperature {
   def apply(daily: DailyWeatherData): DailyTemperature =
-    new DailyTemperature(daily.wsid, daily.year, daily.month, daily.day, daily.highTemp, daily.lowTemp,
+    new DailyTemperature(daily.wsid, daily.year, daily.month, daily.day, daily.ts, daily.highTemp, daily.lowTemp,
       daily.meanTemp, daily.varianceTemp, daily.stdevTemp)
 }
 
@@ -24,6 +25,7 @@ case class MonthlyTemperature(
   wsid: String,
   year: Int,
   month: Int,
+  ts: Long,
   high: Double,
   low: Double,
   mean: Double,
@@ -32,6 +34,6 @@ case class MonthlyTemperature(
 ) extends Serializable
 object MonthlyTemperature {
   def apply(monthly: MonthlyWeatherData): MonthlyTemperature =
-    new MonthlyTemperature(monthly.wsid, monthly.year, monthly.month, monthly.highTemp, monthly.lowTemp,
+    new MonthlyTemperature(monthly.wsid, monthly.year, monthly.month, monthly.ts, monthly.highTemp, monthly.lowTemp,
       monthly.meanTemp, monthly.varianceTemp, monthly.stdevTemp)
 }
