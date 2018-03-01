@@ -8,6 +8,7 @@ case class DailyWindSpeed(
   year: Int,
   month: Int,
   day: Int,
+  ts: Long,
   high: Double,
   low: Double,
   mean: Double,
@@ -17,7 +18,7 @@ case class DailyWindSpeed(
 
 object DailyWindSpeed {
   def apply(daily: DailyWeatherData): DailyWindSpeed =
-    new DailyWindSpeed(daily.wsid, daily.year, daily.month, daily.day, daily.highWind, daily.lowWind,
+    new DailyWindSpeed(daily.wsid, daily.year, daily.month, daily.day, daily.ts, daily.highWind, daily.lowWind,
       daily.meanWind, daily.varianceWind, daily.stdevWind)
 }
 
@@ -25,6 +26,7 @@ case class MonthlyWindSpeed(
   wsid: String,
   year: Int,
   month: Int,
+  ts: Long,
   high: Double,
   low: Double,
   mean: Double,
@@ -34,6 +36,6 @@ case class MonthlyWindSpeed(
 
 object MonthlyWindSpeed {
   def apply(monthly: MonthlyWeatherData): MonthlyWindSpeed =
-    new MonthlyWindSpeed(monthly.wsid, monthly.year, monthly.month, monthly.highWind, monthly.lowWind,
+    new MonthlyWindSpeed(monthly.wsid, monthly.year, monthly.month, monthly.ts, monthly.highWind, monthly.lowWind,
       monthly.meanWind, monthly.varianceWind, monthly.stdevWind)
 }

@@ -8,6 +8,7 @@ message WeatherRecord {
     int32 month =3;
     int32 day = 4;
     int32 hour = 5;
+    int64 ts = 6;
     double temperature = 7;
     double dewpoint = 8;
     double pressure = 9;

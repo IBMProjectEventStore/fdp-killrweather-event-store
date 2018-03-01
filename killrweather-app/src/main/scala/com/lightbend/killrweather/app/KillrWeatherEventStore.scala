@@ -1,5 +1,7 @@
 package com.lightbend.killrweather.app
 
+import java.util.Calendar
+
 import com.lightbend.kafka.KafkaLocalServer
 import com.lightbend.killrweather.EventStore.EventStoreSupport
 import com.lightbend.killrweather.WeatherClient.WeatherRecord
@@ -7,6 +9,7 @@ import com.lightbend.killrweather.app.eventstore.EventStoreSink
 import com.lightbend.killrweather.kafka.MessageListener
 import com.lightbend.killrweather.settings.WeatherSettings
 import com.lightbend.killrweather.utils._
+import org.apache.commons.cli.{BasicParser, CommandLine, CommandLineParser, Options}
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
@@ -24,12 +27,33 @@ object KillrWeatherEventStore {
 
   def main(args: Array[String]): Unit = {
 
+    /**
+      * Get the Event Store configuration string
+      *
+      */
+    var eventStoreConfiguration: Option[String] = None
+    val options: Options = new Options
+    options.addOption("c", true, "Event Store Configuration")
+
+    val parser: CommandLineParser = new BasicParser
+    val cmd: CommandLine = parser.parse(options, args)
+    try {
+      eventStoreConfiguration = Some(cmd.getOptionValue("c"))
+    }
+    catch {
+      case e: Exception =>
+        throw new IllegalArgumentException("Issue in passing arguments - Required arguments are: (1) -a (Number of Actors)")
+    }
+    if (!cmd.hasOption("c")) {
+      throw new IllegalArgumentException("Issue in passing arguments - Required arguments are: -c <ip:port,ip:port,ip:port,...> (IBM Db2 Event Store Configuration)")
+    }
+
     // Create context
 
     import WeatherSettings._
 
     // Initialize Event Store
-    val ctx = EventStoreSupport.createContext()
+    val ctx = EventStoreSupport.createContext(eventStoreConfiguration)
     EventStoreSupport.ensureTables(ctx)
     println(s"Event Store initialised")
 
@@ -64,7 +88,7 @@ object KillrWeatherEventStore {
     val monthlyRDD = ssc.sparkContext.emptyRDD[(String, ListBuffer[DailyWeatherDataProcess])]
 
     // Create broadcast variable for the sink definition
-    val eventStoreSink = spark.sparkContext.broadcast(EventStoreSink())
+    val eventStoreSink = spark.sparkContext.broadcast(EventStoreSink(eventStoreConfiguration))
 
     val kafkaDataStream = KafkaUtils.createDirectStream[Array[Byte], Array[Byte]](
       ssc, PreferConsistent, Subscribe[Array[Byte], Array[Byte]](topics, kafkaParams)
@@ -80,6 +104,7 @@ object KillrWeatherEventStore {
       val current = state.getOption().getOrElse(new ListBuffer[WeatherRecord])
       var daily: Option[(String, DailyWeatherData)] = None
       val last = current.lastOption.getOrElse(null.asInstanceOf[WeatherRecord])
+      val ts = Calendar.getInstance()
       reading match {
         case Some(weather) => {
           current match {
@@ -89,7 +114,8 @@ object KillrWeatherEventStore {
               val tempAggregate = StatCounter(sequence.map(_.temperature))
               val windAggregate = StatCounter(sequence.map(_.windSpeed))
               val pressureAggregate = StatCounter(sequence.map(_.pressure).filter(_ > 1.0)) // remove 0 elements
-              daily = Some((last.wsid, DailyWeatherData(last.wsid, last.year, last.month, last.day,
+              ts.set(last.year, last.month, last.day, 0, 0, 0)
+              daily = Some((last.wsid, DailyWeatherData(last.wsid, last.year, last.month, last.day, ts.getTimeInMillis,
                 tempAggregate.max, tempAggregate.min, tempAggregate.mean, tempAggregate.stdev, tempAggregate.variance,
                 windAggregate.max, windAggregate.min, windAggregate.mean, windAggregate.stdev, windAggregate.variance,
                 pressureAggregate.max, pressureAggregate.min, pressureAggregate.mean, pressureAggregate.stdev, pressureAggregate.variance,
@@ -134,6 +160,7 @@ object KillrWeatherEventStore {
       val current = state.getOption().getOrElse(new ListBuffer[DailyWeatherDataProcess])
       var monthly: Option[(String, MonthlyWeatherData)] = None
       val last = current.lastOption.getOrElse(null.asInstanceOf[DailyWeatherDataProcess])
+      val ts = Calendar.getInstance()
       reading match {
         case Some(weather) => {
           current match {
@@ -143,7 +170,8 @@ object KillrWeatherEventStore {
               val windAggregate = StatCounter(sequence.map(_.wind))
               val pressureAggregate = StatCounter(sequence.map(_.pressure))
               val presipAggregate = StatCounter(sequence.map(_.precip))
-              monthly = Some((last.wsid, MonthlyWeatherData(last.wsid, last.year, last.month,
+              ts.set(last.year, last.month, 1, 0, 0, 0)
+              monthly = Some((last.wsid, MonthlyWeatherData(last.wsid, last.year, last.month, ts.getTimeInMillis,
                 tempAggregate.max, tempAggregate.min, tempAggregate.mean, tempAggregate.stdev, tempAggregate.variance,
                 windAggregate.max, windAggregate.min, windAggregate.mean, windAggregate.stdev, windAggregate.variance,
                 pressureAggregate.max, pressureAggregate.min, pressureAggregate.mean, pressureAggregate.stdev, pressureAggregate.variance,

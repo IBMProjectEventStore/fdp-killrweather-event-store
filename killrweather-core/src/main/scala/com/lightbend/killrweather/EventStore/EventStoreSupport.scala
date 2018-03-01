@@ -29,6 +29,7 @@ object EventStoreSupport {
     StructField("month", IntegerType, nullable = false),
     StructField("day", IntegerType, nullable = false),
     StructField("hour", IntegerType, nullable = false),
+    StructField("ts", LongType, nullable = false),
     StructField("temperature", DoubleType, nullable = false),
     StructField("dewpoint", DoubleType, nullable = false),
     StructField("pressure", DoubleType, nullable = false),
@@ -60,6 +61,7 @@ object EventStoreSupport {
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
     StructField("day", IntegerType, nullable = false),
+    StructField("ts", LongType, nullable = false),
     StructField("high", DoubleType, nullable = false),
     StructField("low", DoubleType, nullable = false),
     StructField("mean", DoubleType, nullable = false),
@@ -74,6 +76,7 @@ object EventStoreSupport {
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
     StructField("day", IntegerType, nullable = false),
+    StructField("ts", LongType, nullable = false),
     StructField("high", DoubleType, nullable = false),
     StructField("low", DoubleType, nullable = false),
     StructField("mean", DoubleType, nullable = false),
@@ -88,6 +91,7 @@ object EventStoreSupport {
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
     StructField("day", IntegerType, nullable = false),
+    StructField("ts", LongType, nullable = false),
     StructField("high", DoubleType, nullable = false),
     StructField("low", DoubleType, nullable = false),
     StructField("mean", DoubleType, nullable = false),
@@ -102,6 +106,7 @@ object EventStoreSupport {
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
     StructField("day", IntegerType, nullable = false),
+    StructField("ts", LongType, nullable = false),
     StructField("precipitation", DoubleType, nullable = false)
   )),
     shardingColumns = Seq("year", "month"),
@@ -111,6 +116,7 @@ object EventStoreSupport {
     StructField("wsid", StringType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
+    StructField("ts", LongType, nullable = false),
     StructField("high", DoubleType, nullable = false),
     StructField("low", DoubleType, nullable = false),
     StructField("mean", DoubleType, nullable = false),
@@ -124,6 +130,7 @@ object EventStoreSupport {
     StructField("wsid", StringType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
+    StructField("ts", LongType, nullable = false),
     StructField("high", DoubleType, nullable = false),
     StructField("low", DoubleType, nullable = false),
     StructField("mean", DoubleType, nullable = false),
@@ -137,6 +144,7 @@ object EventStoreSupport {
     StructField("wsid", StringType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
+    StructField("ts", LongType, nullable = false),
     StructField("high", DoubleType, nullable = false),
     StructField("low", DoubleType, nullable = false),
     StructField("mean", DoubleType, nullable = false),
@@ -150,6 +158,7 @@ object EventStoreSupport {
     StructField("wsid", StringType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
+    StructField("ts", LongType, nullable = false),
     StructField("high", DoubleType, nullable = false),
     StructField("low", DoubleType, nullable = false),
     StructField("mean", DoubleType, nullable = false),
@@ -172,11 +181,11 @@ object EventStoreSupport {
     MONTHLYPRECIP -> monthly_aggregate_precip
   )
 
-  val eventStoreIP = "127.0.0.1"
-  val eventStorePort = "1100"
-
-  def createContext(): EventContext = {
-    ConfigurationReader.setConnectionEndpoints(s"$eventStoreIP:$eventStorePort")
+  def createContext(connectionEndpoints: Option[String]): EventContext = {
+    if (!connectionEndpoints.isDefined) {
+      throw new RuntimeException ("A ConnectionEndpoint is required to initialize the IBM Db2 Event Store")
+    }
+    ConfigurationReader.setConnectionEndpoints(connectionEndpoints.get)
     try {
       EventContext.createDatabase(DBNAME)
     } catch {
