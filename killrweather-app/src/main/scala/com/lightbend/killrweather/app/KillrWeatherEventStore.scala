@@ -6,11 +6,12 @@ import com.lightbend.kafka.KafkaLocalServer
 import com.lightbend.killrweather.EventStore.EventStoreSupport
 import com.lightbend.killrweather.WeatherClient.WeatherRecord
 import com.lightbend.killrweather.app.eventstore.EventStoreSink
-import com.lightbend.killrweather.kafka.MessageListener
+import com.lightbend.killrweather.app.kafka.{KafkaDataConvertor, KafkaSink}
+import com.lightbend.killrweather.kafka.{MessageListener, MessageProducer}
 import com.lightbend.killrweather.settings.WeatherSettings
 import com.lightbend.killrweather.utils._
 import org.apache.commons.cli.{BasicParser, CommandLine, CommandLineParser, Options}
-import org.apache.kafka.common.serialization.ByteArrayDeserializer
+import org.apache.kafka.common.serialization.{ByteArrayDeserializer, ByteArraySerializer}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
 import org.apache.spark.streaming.kafka010.KafkaUtils
@@ -26,7 +27,7 @@ import scala.collection.mutable.ListBuffer
 object KillrWeatherEventStore {
 
   def main(args: Array[String]): Unit = {
-
+/*
     /**
       * Get the Event Store configuration string
       *
@@ -42,31 +43,32 @@ object KillrWeatherEventStore {
     }
     catch {
       case e: Exception =>
-        throw new IllegalArgumentException("Issue in passing arguments - Required arguments are: (1) -a (Number of Actors)")
+        throw new IllegalArgumentException("Issue in passing arguments - Required arguments are: -c <ip:port,ip:port,ip:port,...> (IBM Db2 Event Store Configuration)")
     }
     if (!cmd.hasOption("c")) {
       throw new IllegalArgumentException("Issue in passing arguments - Required arguments are: -c <ip:port,ip:port,ip:port,...> (IBM Db2 Event Store Configuration)")
-    }
+    } */
 
     // Create context
 
     import WeatherSettings._
 
     // Initialize Event Store
-    val ctx = EventStoreSupport.createContext(eventStoreConfiguration)
-    EventStoreSupport.ensureTables(ctx)
+//    val ctx = EventStoreSupport.createContext(eventStoreConfiguration)
+//    EventStoreSupport.ensureTables(ctx)
     println(s"Event Store initialised")
 
     // Create embedded Kafka and topic
     val kafka = KafkaLocalServer(true)
     kafka.start()
     kafka.createTopic(KafkaTopicRaw)
+    kafka.createTopic(KafkaTopicDaily)
 
     println(s"Kafka Cluster created")
 
     val spark = SparkSession
       .builder()
-      .appName("KillrWeather")
+      .appName(AppName)
       .master("local[*]")
       .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .getOrCreate()
@@ -88,7 +90,10 @@ object KillrWeatherEventStore {
     val monthlyRDD = ssc.sparkContext.emptyRDD[(String, ListBuffer[DailyWeatherDataProcess])]
 
     // Create broadcast variable for the sink definition
-    val eventStoreSink = spark.sparkContext.broadcast(EventStoreSink(eventStoreConfiguration))
+//    val eventStoreSink = spark.sparkContext.broadcast(EventStoreSink(eventStoreConfiguration))
+    val kafkaSinkProps = MessageProducer.producerProperties(kafkaBrokers,
+      classOf[ByteArraySerializer].getName, classOf[ByteArraySerializer].getName)
+    val kafkaSink = spark.sparkContext.broadcast(KafkaSink(kafkaSinkProps))
 
     val kafkaDataStream = KafkaUtils.createDirectStream[Array[Byte], Array[Byte]](
       ssc, PreferConsistent, Subscribe[Array[Byte], Array[Byte]](topics, kafkaParams)
@@ -97,7 +102,8 @@ object KillrWeatherEventStore {
     val rawStream = kafkaDataStream.map(r => WeatherRecord.parseFrom(r.value()))
 
     /** Saves the raw data to Cassandra - raw table. */
-    rawStream.foreachRDD {spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeRaw(_)) }
+//    rawStream.foreachRDD (_.foreachPartition ( eventStoreSink.value.writeRaw(_)))
+//    rawStream.foreachRDD {spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeRaw(_)) }
 
     // Calculate daily
     val dailyMappingFunc = (station: String, reading: Option[WeatherRecord], state: State[ListBuffer[WeatherRecord]]) => {
@@ -139,6 +145,9 @@ object KillrWeatherEventStore {
     // Just for testing
     dailyStream.print()
 
+    //  Write dayly temperature to Kafka
+    dailyStream.map(ds => KafkaDataConvertor.toGPB(ds._2)).foreachRDD(_.foreach(kafkaSink.value.send(KafkaTopicDaily, _)))
+/*
     // Save daily temperature
     dailyStream.map(ds => DailyTemperature(ds._2))
       .foreachRDD { spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeDailyTemperature(_)) }
@@ -154,7 +163,7 @@ object KillrWeatherEventStore {
     // Save daily presipitations
     dailyStream.map(ds => DailyPrecipitation(ds._2))
       .foreachRDD { spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeDailyPresip(_)) }
-
+*/
     // Calculate monthly
     val monthlyMappingFunc = (station: String, reading: Option[DailyWeatherDataProcess], state: State[ListBuffer[DailyWeatherDataProcess]]) => {
       val current = state.getOption().getOrElse(new ListBuffer[DailyWeatherDataProcess])
@@ -190,7 +199,7 @@ object KillrWeatherEventStore {
 
     val monthlyStream = dailyStream.map(r => (r._1, DailyWeatherDataProcess(r._2))).
       mapWithState(StateSpec.function(monthlyMappingFunc).initialState(monthlyRDD)).filter(_.isDefined).map(_.get)
-
+/*
     // Save monthly temperature
     monthlyStream.map(ds => MonthlyTemperature(ds._2))
       .foreachRDD { spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeMothlyTemperature(_)) }
@@ -206,7 +215,7 @@ object KillrWeatherEventStore {
     // Save monthly presipitations
     monthlyStream.map(ds => MonthlyPrecipitation(ds._2))
       .foreachRDD { spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeMothlyPresip(_)) }
-
+*/
     // Execute
     ssc.start()
     ssc.awaitTermination()

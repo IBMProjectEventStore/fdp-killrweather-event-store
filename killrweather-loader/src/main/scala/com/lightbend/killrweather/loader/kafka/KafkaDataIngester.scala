@@ -8,8 +8,8 @@ import org.apache.kafka.common.serialization.ByteArraySerializer
 import scala.collection.mutable.ListBuffer
 
 /**
- * Created by boris on 7/7/17.
- */
+  * Created by boris on 7/7/17.
+  */
 object KafkaDataIngester {
   val file = "data/load/"
   val timeInterval: Long = 100 * 1 // 1 sec
@@ -36,9 +36,9 @@ object KafkaDataIngester {
 
 class KafkaDataIngester(brokers: String) {
 
-  var sender = MessageSender[Array[Byte], Array[Byte]](brokers, classOf[ByteArraySerializer].getName, classOf[ByteArraySerializer].getName)
-
   import KafkaDataIngester._
+
+  var sender = MessageSender[Array[Byte], Array[Byte]](brokers, classOf[ByteArraySerializer].getName, classOf[ByteArraySerializer].getName)
 
   def execute(file: String, topic: String): Unit = {
 

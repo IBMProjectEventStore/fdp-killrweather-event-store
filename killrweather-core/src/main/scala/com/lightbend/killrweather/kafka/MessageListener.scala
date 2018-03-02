@@ -1,6 +1,10 @@
 package com.lightbend.killrweather.kafka
 
-import org.apache.kafka.clients.consumer.{ ConsumerConfig, KafkaConsumer }
+import java.util.Properties
+
+import org.apache.kafka.clients.consumer.{ConsumerConfig, KafkaConsumer}
+import org.apache.kafka.clients.producer.ProducerConfig
+
 import scala.collection.JavaConversions._
 
 object MessageListener {
@@ -54,5 +58,27 @@ class MessageListener[K, V](brokers: String, topic: String, group: String, keyDe
   def start(): Unit = {
     val t = new Thread(this)
     t.start()
+  }
+}
+
+object MessageProducer{
+
+  private val ACKCONFIGURATION = "all" // Blocking on the full commit of the record
+  private val RETRYCOUNT = "1" // Number of retries on put
+  private val BATCHSIZE = "1024" // Buffers for unsent records for each partition - controlls batching
+  private val LINGERTIME = "1" // Timeout for more records to arive - controlls batching
+  private val BUFFERMEMORY = "1024000" // Controls the total amount of memory available to the producer for buffering. If records are sent faster than they can be transmitted to the server then this buffer space will be exhausted. When the buffer space is exhausted additional send calls will block. The threshold for time to block is determined by max.block.ms after which it throws a TimeoutException.
+
+  def producerProperties(brokers: String, keySerealizer: String, valueSerealizer: String): Properties = {
+    val props = new Properties()
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokers)
+    props.put(ProducerConfig.ACKS_CONFIG, ACKCONFIGURATION)
+    props.put(ProducerConfig.RETRIES_CONFIG, RETRYCOUNT)
+    props.put(ProducerConfig.BATCH_SIZE_CONFIG, BATCHSIZE)
+    props.put(ProducerConfig.LINGER_MS_CONFIG, LINGERTIME)
+    props.put(ProducerConfig.BUFFER_MEMORY_CONFIG, BUFFERMEMORY)
+    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, keySerealizer)
+    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, valueSerealizer)
+    props
   }
 }

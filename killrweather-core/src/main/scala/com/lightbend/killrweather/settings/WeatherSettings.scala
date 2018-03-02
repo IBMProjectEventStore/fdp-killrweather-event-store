@@ -17,9 +17,9 @@ package com.lightbend.killrweather.settings
 
 final object WeatherSettings{
 
-  // val AppName: String = "KillrWeather"  // Don't use, as different apps use WeatherSettings
+  val AppName: String = "KillrWeatherEventStore"
 
-  val localAddress = "localhost" //InetAddress.getLocalHost.getHostAddress
+  val localAddress = "localhost"
 
   val SparkCleanerTtl = (3600 * 2)
 
@@ -30,6 +30,7 @@ final object WeatherSettings{
   val kafkaBrokers = "localhost:9092"
   val KafkaGroupId = "killrweather.group"
   val KafkaTopicRaw = "killrweather.raw"
+  val KafkaTopicDaily = "killrweather.dayly"
 
   // Event Store
   val DBNAME = "KillrWeather"
