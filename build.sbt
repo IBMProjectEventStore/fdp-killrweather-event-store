@@ -31,6 +31,6 @@ lazy val dailyreader = (project in file("./killrweather-daylyreader"))
   .settings(defaultSettings:_*)
   .dependsOn(killrWeatherCore, protobufs)
 
-lazy val killrweather = (project in file("."))
+lazy val killrweathereventstore = (project in file("."))
   .aggregate(killrWeatherCore, killrWeatherApp,loader, dailyreader, protobufs)
 
