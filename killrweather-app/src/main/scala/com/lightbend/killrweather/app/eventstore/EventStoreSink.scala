@@ -2,6 +2,7 @@ package com.lightbend.killrweather.app.eventstore
 
 import com.ibm.event.oltp.{EventContext, InsertResult}
 import com.lightbend.killrweather.EventStore.EventStoreSupport
+import com.lightbend.killrweather.settings.WeatherSettings._
 import org.apache.spark.sql.Row
 
 import scala.concurrent.duration.Duration
@@ -9,7 +10,7 @@ import scala.concurrent.{Await, Future}
 
 object EventStoreSink {
 
-  def apply(eventStoreConfiguration: Option[String]): EventStoreSink = {
+  def apply(eventStoreConfiguration: String): EventStoreSink = {
     val f = () => {
       val ctx = EventStoreSupport.createContext(eventStoreConfiguration)
       sys.addShutdownHook {
@@ -21,11 +22,9 @@ object EventStoreSink {
   }
 }
 
-class EventStoreSink(createContext: () => EventContext) extends Serializable {
+class EventStoreSink(createContext: () => Option[EventContext]) extends Serializable {
 
-  import com.lightbend.killrweather.settings.WeatherSettings._
-
-  lazy val ctx = createContext()
+  var ctx = createContext()
 
   def writeRaw(raw: Iterator[Row]): Unit = {
     writeBatch(RAWWEATHER, raw)
@@ -64,18 +63,25 @@ class EventStoreSink(createContext: () => EventContext) extends Serializable {
   }
 
   private def writeBatch(tableName : String, data: Iterator[Row]) : Unit = {
-    val dataSeq = data.toIndexedSeq
-    if(dataSeq.size > 0) {
-      try {
-        val table = ctx.getTable(tableName)
-        val future: Future[InsertResult] = ctx.batchInsertAsync(table, dataSeq)
-        val result: InsertResult = Await.result(future, Duration.Inf)
-        if (result.failed) {
-          println(s"batch insert incomplete: $result")
+    // Ensure that  that we are connected
+    ctx = EventStoreSupport.createContext(eventStore)
+
+    ctx.foreach(context => {
+      EventStoreSupport.ensureTables(context)
+      // Read
+      val dataSeq = data.toIndexedSeq
+      if (dataSeq.size > 0) {
+        try {
+          val table = context.getTable(tableName)
+          val future: Future[InsertResult] = context.batchInsertAsync(table, dataSeq)
+          val result: InsertResult = Await.result(future, Duration.Inf)
+          if (result.failed) {
+            println(s"batch insert incomplete: $result")
+          }
+        } catch {
+          case t: Throwable => printf(s"Error writing to eventStore $t")
         }
-      }catch {
-        case t : Throwable => printf(s"Error writing to eventStore $t")
       }
-    }
+    })
   }
 }

@@ -10,7 +10,6 @@ import com.lightbend.killrweather.app.kafka.{KafkaDataConvertor, KafkaSink}
 import com.lightbend.killrweather.kafka.{MessageListener, MessageProducer}
 import com.lightbend.killrweather.settings.WeatherSettings
 import com.lightbend.killrweather.utils._
-import org.apache.commons.cli.{BasicParser, CommandLine, CommandLineParser, Options}
 import org.apache.kafka.common.serialization.{ByteArrayDeserializer, ByteArraySerializer}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.kafka010.ConsumerStrategies.Subscribe
@@ -28,43 +27,23 @@ object KillrWeatherEventStore {
 
   def main(args: Array[String]): Unit = {
 
-    /**
-      * Get the Event Store configuration string
-      *
-      */
-    var eventStoreConfiguration: Option[String] = None
-    val options: Options = new Options
-    options.addOption("c", true, "Event Store Configuration")
-
-    val parser: CommandLineParser = new BasicParser
-    val cmd: CommandLine = parser.parse(options, args)
-    try {
-      eventStoreConfiguration = Some(cmd.getOptionValue("c"))
-    }
-    catch {
-      case e: Exception =>
-        throw new IllegalArgumentException("Issue in passing arguments - Required arguments are: -c <ip:port,ip:port,ip:port,...> (IBM Db2 Event Store Configuration)")
-    }
-    if (!cmd.hasOption("c")) {
-      throw new IllegalArgumentException("Issue in passing arguments - Required arguments are: -c <ip:port,ip:port,ip:port,...> (IBM Db2 Event Store Configuration)")
-    }
-
     // Create context
 
     import WeatherSettings._
 
     // Initialize Event Store
-    val ctx = EventStoreSupport.createContext(eventStoreConfiguration)
-    EventStoreSupport.ensureTables(ctx)
+    val ctx = EventStoreSupport.createContext(eventStore)
+    ctx.foreach(EventStoreSupport.ensureTables(_))
     println(s"Event Store initialised")
 
     // Create embedded Kafka and topic
-    val kafka = KafkaLocalServer(true)
-    kafka.start()
-    kafka.createTopic(KafkaTopicRaw)
-    kafka.createTopic(KafkaTopicDaily)
-
-    println(s"Kafka Cluster created")
+    if(localKafkaBrokers) {
+      val kafka = KafkaLocalServer(true)
+      kafka.start()
+      kafka.createTopic(KafkaTopicRaw)
+      kafka.createTopic(KafkaTopicDaily)
+      println(s"Kafka Cluster created")
+    }
 
     val spark = SparkSession
       .builder()
@@ -90,7 +69,7 @@ object KillrWeatherEventStore {
     val monthlyRDD = ssc.sparkContext.emptyRDD[(String, ListBuffer[DailyWeatherDataProcess])]
 
     // Create broadcast variable for the sink definition
-    val eventStoreSink = spark.sparkContext.broadcast(EventStoreSink(eventStoreConfiguration))
+    val eventStoreSink = spark.sparkContext.broadcast(EventStoreSink(eventStore))
     val kafkaSinkProps = MessageProducer.producerProperties(kafkaBrokers,
       classOf[ByteArraySerializer].getName, classOf[ByteArraySerializer].getName)
     val kafkaSink = spark.sparkContext.broadcast(KafkaSink(kafkaSinkProps))
@@ -101,8 +80,7 @@ object KillrWeatherEventStore {
 
     val rawStream = kafkaDataStream.map(r => WeatherRecord.parseFrom(r.value()))
 
-    /** Saves the raw data to Cassandra - raw table. */
-//    rawStream.foreachRDD (_.foreachPartition ( eventStoreSink.value.writeRaw(_)))
+    /** Saves the raw data to Event Store - raw table. */
     rawStream.foreachRDD {spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeRaw(_)) }
 
     // Calculate daily
@@ -199,7 +177,7 @@ object KillrWeatherEventStore {
 
     val monthlyStream = dailyStream.map(r => (r._1, DailyWeatherDataProcess(r._2))).
       mapWithState(StateSpec.function(monthlyMappingFunc).initialState(monthlyRDD)).filter(_.isDefined).map(_.get)
-
+/*
     // Save monthly temperature
     monthlyStream.map(ds => MonthlyTemperature(ds._2))
       .foreachRDD { spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeMothlyTemperature(_)) }
@@ -215,7 +193,7 @@ object KillrWeatherEventStore {
     // Save monthly presipitations
     monthlyStream.map(ds => MonthlyPrecipitation(ds._2))
       .foreachRDD { spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeMothlyPresip(_)) }
-
+*/
     // Execute
     ssc.start()
     ssc.awaitTermination()
