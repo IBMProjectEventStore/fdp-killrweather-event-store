@@ -17,9 +17,7 @@ package com.lightbend.killrweather.settings
 
 final object WeatherSettings{
 
-  // val AppName: String = "KillrWeather"  // Don't use, as different apps use WeatherSettings
-
-  val localAddress = "localhost" //InetAddress.getLocalHost.getHostAddress
+  val AppName: String = "KillrWeatherEventStore"
 
   val SparkCleanerTtl = (3600 * 2)
 
@@ -27,11 +25,32 @@ final object WeatherSettings{
 
   val SparkCheckpointDir = "./checkpoints/"
 
-  val kafkaBrokers = "localhost:9092"
+  val localKafkaBrokers = sys.env.get("kafka.brokers.local") match {
+    case Some(kb) => kb match {
+      case "false" => false
+      case _ => true
+    }
+    case None => true // local
+  }
+  println(s"Using Local Kafka Brokers: $localKafkaBrokers")
+
+  val kafkaBrokers = sys.env.get("kafka.brokers") match {
+    case Some(kb) => kb
+    case None => "localhost:9092" // local
+  }
+  println(s"Using Kafka Brokers: $kafkaBrokers")
+
   val KafkaGroupId = "killrweather.group"
   val KafkaTopicRaw = "killrweather.raw"
+  val KafkaTopicDaily = "killrweather.dayly"
 
   // Event Store
+  val eventStore = sys.env.get("eventstore.endpoint") match {
+    case Some(kb) => kb
+    case None => "localhost:1100" // local
+  }
+  println(s"Using EventStore: $eventStore")
+
   val DBNAME = "KillrWeather"
 
   val RAWWEATHER = "raw_weather_data"

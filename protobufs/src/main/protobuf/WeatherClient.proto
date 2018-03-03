@@ -19,3 +19,12 @@ message WeatherRecord {
     double oneHourPrecip = 14;
     double sixHourPrecip = 15;
 }
+
+message TemperatureDailyRecord{
+    string wsid = 1;
+    int32 year = 2;
+    int32 month =3;
+    int32 day = 4;
+    int64 ts = 6;
+    double temperature = 7;
+}

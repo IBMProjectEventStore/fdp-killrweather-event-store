@@ -1,5 +1,6 @@
 package com.lightbend.killrweather.utils
 
+
 /**
  * Created by boris on 7/19/17.
  */
@@ -15,6 +16,7 @@ case class DailyTemperature(
   variance: Double,
   stdev: Double
 ) extends Serializable
+
 object DailyTemperature {
   def apply(daily: DailyWeatherData): DailyTemperature =
     new DailyTemperature(daily.wsid, daily.year, daily.month, daily.day, daily.ts, daily.highTemp, daily.lowTemp,

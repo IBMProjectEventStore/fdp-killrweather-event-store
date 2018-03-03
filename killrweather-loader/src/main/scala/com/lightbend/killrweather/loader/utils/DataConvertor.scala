@@ -12,6 +12,7 @@ object DataConvertor {
 
   implicit val formats = DefaultFormats
   private val bos = new ByteArrayOutputStream()
+  private val MONTHOFFSET = 44
 
   def convertToJson(string: String): String = {
     val report = RawWeatherData(string.split(","))
@@ -23,12 +24,13 @@ object DataConvertor {
     val date = Calendar.getInstance()
     // Month is 0-based
     date.set(report.year, report.month-1, report.day, report.hour, DataConvertorImpl.DEFAULT_HOUR, DataConvertorImpl.DEFAULT_MIN)
+    date.add(Calendar.MONTH, MONTHOFFSET)
     WeatherRecord(
       wsid = report.wsid,
-      year = report.year,
-      month = report.month,
-      day = report.day,
-      hour = report.hour,
+      year = date.get(Calendar.YEAR),
+      month = date.get(Calendar.MONTH),
+      day = date.get(Calendar.DAY_OF_MONTH),
+      hour = date.get(Calendar.HOUR_OF_DAY),
       ts = date.getTimeInMillis,
       temperature = report.temperature,
       dewpoint = report.dewpoint,

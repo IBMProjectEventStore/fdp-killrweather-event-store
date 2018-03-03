@@ -193,17 +193,18 @@ object EventStoreSupport {
     PREDICTTEMP -> daily_predicted_temperature
   )
 
-  def createContext(connectionEndpoints: Option[String]): EventContext = {
-    if (!connectionEndpoints.isDefined) {
-      throw new RuntimeException ("A ConnectionEndpoint is required to initialize the IBM Db2 Event Store")
-    }
-    ConfigurationReader.setConnectionEndpoints(connectionEndpoints.get)
+  def createContext(connectionEndpoints: String): Option[EventContext] = {
+    ConfigurationReader.setConnectionEndpoints(connectionEndpoints)
     try {
-      EventContext.createDatabase(DBNAME)
+      Some(EventContext.createDatabase(DBNAME))
     } catch {
       case e: Throwable => {
-        EventContext.openDatabase(DBNAME)
-        EventContext.getEventContext
+        try {
+          EventContext.openDatabase(DBNAME)
+          Some(EventContext.getEventContext)
+        }catch {
+          case e: Throwable => None
+        }
       }
     }
   }
