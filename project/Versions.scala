@@ -16,6 +16,12 @@
 
 object Versions {
 
+  val Akka              = "2.5.6"
+  val AkkaStreams       = "2.5.6"
+  val AkkaStreamsKafka  = "0.18"
+  val AkkaHTTP          = "10.0.10"
+  val akkaHttpJsonVersion = "1.18.1"
+
   val Curator           = "4.0.0"
   val JDK               = "1.8"
   val JodaConvert       = "1.8.2"
@@ -27,4 +33,6 @@ object Versions {
   val Slf4j             = "1.7.16"
   val Spark             = "2.1.0" //"2.2.0"
   val ScalaPBJSONVersion= "0.3.1"
+
+  val PMMLVersion = "1.3.10"
 }

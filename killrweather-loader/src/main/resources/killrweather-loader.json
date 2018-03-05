@@ -1,0 +1,21 @@
+{
+  "id": "/killrweatherloader",
+  "cmd": "env; export PATH=$(ls -d $MESOS_SANDBOX/jre*/bin):$PATH && cd loader-0.1-SNAPSHOT && ln -s ../data ./data && bin/loader",
+  "instances": 1,
+  "cpus": 1,
+  "mem": 2048,
+  "env":{
+    "kafka.brokers":"broker.kafka.l4lb.thisdcos.directory:9092"
+  },
+  "fetch": [
+    {
+      "uri": "https://downloads.mesosphere.com/java/jre-8u112-linux-x64.tar.gz"
+    },
+    {
+      "uri": "http://fdp-lab.marathon.mesos/loader-0.1-SNAPSHOT.tgz"
+    },
+    {
+      "uri": "http://fdp-lab.marathon.mesos/data.zip"
+    }
+  ]
+}

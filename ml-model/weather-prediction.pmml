@@ -1,1 +1,77 @@
-<?xml version="1.0" ?><PMML version="4.3" xmlns="http://www.dmg.org/PMML-4_3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.dmg.org/PMML-4_3 http://www.dmg.org/v4-3/pmml-4-3.xsd"><Header copyright="(c) Copyright IBM Corp. 2011, 2015" description="linear engine"><Application name="Analytic Framework" version="3.0"></Application><Timestamp>Sat Mar 3 20:35:13 2018</Timestamp></Header><DataDictionary numberOfFields="13"><DataField name="wsid" displayName="wsid" optype="categorical" dataType="string"><Value value="725030:14732" property="valid"></Value></DataField><DataField name="year" displayName="year" optype="continuous" dataType="integer"></DataField><DataField name="month" displayName="month" optype="continuous" dataType="integer"></DataField><DataField name="day" displayName="day" optype="continuous" dataType="integer"></DataField><DataField name="ts" displayName="ts" optype="continuous" dataType="integer"></DataField><DataField name="high" displayName="high" optype="continuous" dataType="double"></DataField><DataField name="low" displayName="low" optype="continuous" dataType="double"></DataField><DataField name="mean" displayName="mean" optype="continuous" dataType="double"></DataField><DataField name="variance" displayName="variance" optype="continuous" dataType="double"></DataField><DataField name="stdev" displayName="stdev" optype="continuous" dataType="double"></DataField><DataField name="mean1" displayName="mean1" optype="continuous" dataType="double"></DataField><DataField name="mean2" displayName="mean2" optype="continuous" dataType="double"></DataField><DataField name="mean3" displayName="mean3" optype="continuous" dataType="double"></DataField></DataDictionary><GeneralRegressionModel modelType="generalLinear" targetVariableName="mean" algorithmName="LE" functionName="regression"><Extension extender="spss.com" name="modelID" value="0"></Extension><MiningSchema><MiningField name="mean1"></MiningField><MiningField name="mean2"></MiningField><MiningField name="mean" usageType="predicted"></MiningField></MiningSchema><ModelStats><UnivariateStats field="mean"><Anova><AnovaRow degreesOfFreedom="3.0" fValue="739.6849033341923" meanOfSquares="5529.788236511733" pValue="0.0" sumOfSquares="16589.3647095352" type="Model"></AnovaRow><AnovaRow degreesOfFreedom="232.0" meanOfSquares="7.475870078712902" sumOfSquares="1734.4018582613933" type="Error"></AnovaRow><AnovaRow degreesOfFreedom="235.0" sumOfSquares="18323.766567796592" type="Total"></AnovaRow></Anova></UnivariateStats><UnivariateStats field="mean"><Counts totalFreq="236.0"></Counts><NumericInfo maximum="30.3" mean="14.503813559322042" minimum="-7.0" standardDeviation="8.830259042439312"></NumericInfo></UnivariateStats><UnivariateStats field="mean1"><Counts totalFreq="236.0"></Counts><NumericInfo maximum="31.6" mean="14.497033898305089" minimum="-7.0" standardDeviation="8.868833290278992"></NumericInfo></UnivariateStats><UnivariateStats field="mean2"><Counts totalFreq="236.0"></Counts><NumericInfo maximum="31.6" mean="14.580084745762713" minimum="-7.0" standardDeviation="8.871387523298274"></NumericInfo></UnivariateStats></ModelStats><Targets><Target field="mean" optype="continuous"></Target></Targets><ParameterList><Parameter label="Intercept" name="P0000001"></Parameter><Parameter label="mean1" name="P0000002"></Parameter><Parameter label="mean2" name="P0000003"></Parameter><Parameter label="mean2 * mean2" name="P0000004"></Parameter></ParameterList><CovariateList><Predictor name="mean1"></Predictor><Predictor name="mean2"></Predictor></CovariateList><PPMatrix><PPCell parameterName="P0000002" predictorName="mean1" value="1"></PPCell><PPCell parameterName="P0000003" predictorName="mean2" value="1"></PPCell><PPCell parameterName="P0000004" predictorName="mean2" value="2"></PPCell></PPMatrix><ParamMatrix><PCell beta="1.3894286045739992" df="1" parameterName="P0000001"></PCell><PCell beta="0.9790684307110793" df="1" parameterName="P0000002"></PCell><PCell beta="-0.1890297008036651" df="1" parameterName="P0000003"></PCell><PCell beta="0.005763476923377929" df="1" parameterName="P0000004"></PCell></ParamMatrix></GeneralRegressionModel></PMML>
+<?xml version="1.0" ?>
+<PMML version="4.3" xmlns="http://www.dmg.org/PMML-4_3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.dmg.org/PMML-4_3 http://www.dmg.org/v4-3/pmml-4-3.xsd">
+    <Header copyright="(c) Copyright IBM Corp. 2011, 2015" description="linear engine">
+        <Application name="Analytic Framework" version="3.0"></Application>
+        <Timestamp>Sat Mar 3 20:35:13 2018</Timestamp>
+    </Header>
+    <DataDictionary numberOfFields="13">
+        <DataField name="wsid" displayName="wsid" optype="categorical" dataType="string">
+            <Value value="725030:14732" property="valid"></Value>
+        </DataField>
+        <DataField name="year" displayName="year" optype="continuous" dataType="integer"></DataField>
+        <DataField name="month" displayName="month" optype="continuous" dataType="integer"></DataField>
+        <DataField name="day" displayName="day" optype="continuous" dataType="integer"></DataField>
+        <DataField name="ts" displayName="ts" optype="continuous" dataType="integer"></DataField>
+        <DataField name="high" displayName="high" optype="continuous" dataType="double"></DataField>
+        <DataField name="low" displayName="low" optype="continuous" dataType="double"></DataField>
+        <DataField name="mean" displayName="mean" optype="continuous" dataType="double"></DataField>
+        <DataField name="variance" displayName="variance" optype="continuous" dataType="double"></DataField>
+        <DataField name="stdev" displayName="stdev" optype="continuous" dataType="double"></DataField>
+        <DataField name="mean1" displayName="mean1" optype="continuous" dataType="double"></DataField>
+        <DataField name="mean2" displayName="mean2" optype="continuous" dataType="double"></DataField>
+        <DataField name="mean3" displayName="mean3" optype="continuous" dataType="double"></DataField>
+    </DataDictionary>
+    <GeneralRegressionModel modelType="generalLinear" targetVariableName="mean" algorithmName="LE" functionName="regression">
+        <Extension extender="spss.com" name="modelID" value="0"></Extension>
+        <MiningSchema>
+            <MiningField name="mean1"></MiningField>
+            <MiningField name="mean2"></MiningField>
+            <MiningField name="mean" usageType="predicted"></MiningField>
+        </MiningSchema>
+        <ModelStats>
+            <UnivariateStats field="mean">
+                <Anova>
+                    <AnovaRow degreesOfFreedom="3.0" fValue="739.6849033341923" meanOfSquares="5529.788236511733" pValue="0.0" sumOfSquares="16589.3647095352" type="Model"></AnovaRow>
+                    <AnovaRow degreesOfFreedom="232.0" meanOfSquares="7.475870078712902" sumOfSquares="1734.4018582613933" type="Error"></AnovaRow>
+                    <AnovaRow degreesOfFreedom="235.0" sumOfSquares="18323.766567796592" type="Total"></AnovaRow>
+                </Anova>
+            </UnivariateStats>
+            <UnivariateStats field="mean">
+                <Counts totalFreq="236.0"></Counts>
+                <NumericInfo maximum="30.3" mean="14.503813559322042" minimum="-7.0" standardDeviation="8.830259042439312"></NumericInfo>
+            </UnivariateStats>
+            <UnivariateStats field="mean1">
+                <Counts totalFreq="236.0"></Counts>
+                <NumericInfo maximum="31.6" mean="14.497033898305089" minimum="-7.0" standardDeviation="8.868833290278992"></NumericInfo>
+            </UnivariateStats>
+            <UnivariateStats field="mean2">
+                <Counts totalFreq="236.0"></Counts>
+                <NumericInfo maximum="31.6" mean="14.580084745762713" minimum="-7.0" standardDeviation="8.871387523298274"></NumericInfo>
+            </UnivariateStats>
+        </ModelStats>
+        <Targets>
+            <Target field="mean" optype="continuous"></Target>
+        </Targets>
+        <ParameterList>
+            <Parameter label="Intercept" name="P0000001"></Parameter>
+            <Parameter label="mean1" name="P0000002"></Parameter>
+            <Parameter label="mean2" name="P0000003"></Parameter>
+            <Parameter label="mean2 * mean2" name="P0000004"></Parameter>
+        </ParameterList>
+        <CovariateList>
+            <Predictor name="mean1"></Predictor>
+            <Predictor name="mean2"></Predictor>
+        </CovariateList>
+        <PPMatrix>
+            <PPCell parameterName="P0000002" predictorName="mean1" value="1"></PPCell>
+            <PPCell parameterName="P0000003" predictorName="mean2" value="1"></PPCell>
+            <PPCell parameterName="P0000004" predictorName="mean2" value="2"></PPCell>
+        </PPMatrix>
+        <ParamMatrix>
+            <PCell beta="1.3894286045739992" df="1" parameterName="P0000001"></PCell>
+            <PCell beta="0.9790684307110793" df="1" parameterName="P0000002"></PCell>
+            <PCell beta="-0.1890297008036651" df="1" parameterName="P0000003"></PCell>
+            <PCell beta="0.005763476923377929" df="1" parameterName="P0000004"></PCell>
+        </ParamMatrix>
+    </GeneralRegressionModel>
+</PMML>
