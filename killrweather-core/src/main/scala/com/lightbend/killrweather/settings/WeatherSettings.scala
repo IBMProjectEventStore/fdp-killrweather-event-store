@@ -61,6 +61,8 @@ final object WeatherSettings{
   val DAYLYPRESS = "daily_aggregate_pressure"
   val DAYLYPRECIP = "daily_aggregate_precip"
 
+  val PREDICTTEMP = "daily_predicted_temperature"
+
   val MONTHLYTEMP = "monthly_aggregate_temperature"
   val MONTHLYWIND = "monthly_aggregate_windspeed"
   val MONTHLYPRESS = "monthly_aggregate_pressure"
