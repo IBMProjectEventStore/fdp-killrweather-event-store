@@ -181,9 +181,11 @@ object EventStoreSupport {
     MONTHLYPRECIP -> monthly_aggregate_precip
   )
 
-  def createContext(connectionEndpoints: String): Option[EventContext] = {
-    ConfigurationReader.setConnectionEndpoints(connectionEndpoints)
+  def createContext(connectionEndpoints: String, user: String, password: String): Option[EventContext] = {
     ConfigurationReader.setUseFrontendConnectionEndpoints(true)
+    ConfigurationReader.setConnectionEndpoints(connectionEndpoints)
+    ConfigurationReader.setEventUser(user)
+    ConfigurationReader.setEventPassword(password)
     try {
       Some(EventContext.createDatabase(DBNAME))
     } catch {
@@ -211,7 +213,7 @@ object EventStoreSupport {
       }
       catch {
         case t: Throwable =>
-          println(s"Error getting existing tables")
+          println(s"Error getting existing tables with message: ${t.getMessage}")
           Thread.sleep(10)
       }
     }

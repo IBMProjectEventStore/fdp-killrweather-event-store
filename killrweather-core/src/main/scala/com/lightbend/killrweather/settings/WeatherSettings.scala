@@ -51,6 +51,17 @@ final object WeatherSettings{
   }
   println(s"Using EventStore: $eventStore")
 
+  // Credentials
+  val user = sys.env.get("eventstore.user") match {
+    case Some(u) => u
+    case None => "admin" // local
+  }
+  println(s"Using EventStore user: $user")
+  val password = sys.env.get("eventstore.password") match {
+    case Some(p) => p
+    case None => "password" // local
+  }
+
   val DBNAME = "KillrWeather"
 
   val RAWWEATHER = "raw_weather_data"

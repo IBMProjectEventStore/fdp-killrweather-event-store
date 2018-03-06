@@ -10,9 +10,9 @@ import scala.concurrent.{Await, Future}
 
 object EventStoreSink {
 
-  def apply(eventStoreConfiguration: String): EventStoreSink = {
+  def apply(eventStoreConfiguration: String, user: String, password: String): EventStoreSink = {
     val f = () => {
-      val ctx = EventStoreSupport.createContext(eventStoreConfiguration)
+      val ctx = EventStoreSupport.createContext(eventStoreConfiguration, user, password)
       sys.addShutdownHook {
         EventContext.cleanUp()
       }
@@ -64,7 +64,7 @@ class EventStoreSink(createContext: () => Option[EventContext]) extends Serializ
 
   private def writeBatch(tableName : String, data: Iterator[Row]) : Unit = {
     // Ensure that  that we are connected
-    ctx = EventStoreSupport.createContext(eventStore)
+    ctx = EventStoreSupport.createContext(eventStore, user, password)
 
     ctx.foreach(context => {
       EventStoreSupport.ensureTables(context)
