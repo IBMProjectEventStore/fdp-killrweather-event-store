@@ -183,6 +183,7 @@ object EventStoreSupport {
 
   def createContext(connectionEndpoints: String): Option[EventContext] = {
     ConfigurationReader.setConnectionEndpoints(connectionEndpoints)
+    ConfigurationReader.setUseFrontendConnectionEndpoints(true)
     try {
       Some(EventContext.createDatabase(DBNAME))
     } catch {
