@@ -6,8 +6,20 @@
   "mem": 1024,
   "env":{
     "kafka.brokers":"broker.kafka.l4lb.thisdcos.directory:9092",
-    "modellistener.port":"1000"
+    "modellistener.port": "10104"
   },
+  "networks": [
+    {
+      "mode": "host"
+    }
+  ],
+  "portDefinitions": [
+    {
+      "name": "killrlistener",
+      "protocol": "tcp",
+      "port": 10104
+    }
+  ],
   "fetch": [
     {
       "uri": "https://downloads.mesosphere.com/java/jre-8u112-linux-x64.tar.gz"

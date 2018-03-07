@@ -64,24 +64,31 @@ class EventStoreSink(createContext: () => Option[EventContext]) extends Serializ
 
   private def writeBatch(tableName : String, data: Iterator[Row]) : Unit = {
     // Ensure that  that we are connected
-    ctx = EventStoreSupport.createContext(eventStore, user, password)
+    if (!ctx.isDefined){
+      println(s"reqreating  !!!!!!!")
+      ctx = EventStoreSupport.createContext(eventStore, user, password)
+      EventStoreSupport.ensureTables(ctx.get)
+    }
 
-    ctx.foreach(context => {
-      EventStoreSupport.ensureTables(context)
-      // Read
-      val dataSeq = data.toIndexedSeq
-      if (dataSeq.size > 0) {
+    // write
+    val dataSeq = data.toIndexedSeq
+    println(s"Inserting a new batch ${dataSeq.size}, table $tableName context = ${ctx.getOrElse(null)}  !!!!!!!")
+    val start = System.currentTimeMillis()
+    if (dataSeq.size > 0) {
         try {
-          val table = context.getTable(tableName)
-          val future: Future[InsertResult] = context.batchInsertAsync(table, dataSeq)
+          val table = ctx.get.getTable(tableName)
+          val future: Future[InsertResult] = ctx.get.batchInsertAsync(table, dataSeq)
           val result: InsertResult = Await.result(future, Duration.Inf)
           if (result.failed) {
             println(s"batch insert incomplete: $result")
           }
         } catch {
-          case t: Throwable => printf(s"Error writing to eventStore $t")
+          case t: Throwable =>
+            printf(s"Error writing to eventStore $t")
+            ctx = None
         }
       }
-    })
+//    })
+    println(s"Done inserting batch, table $tableName  in ${System.currentTimeMillis() - start} !!!!!!!")
   }
 }
