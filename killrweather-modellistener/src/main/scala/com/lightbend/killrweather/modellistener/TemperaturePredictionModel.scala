@@ -18,13 +18,14 @@ import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.lightbend.killrweather.modellistener.resources.TemperaturePredictionModelResource
 import com.lightbend.killrweather.modellistener.services.RequestService
+import com.lightbend.killrweather.settings.WeatherSettings._
 
 object TemperaturePredictionModel extends TemperaturePredictionModelResource {
 
   def main(args: Array[String]) {
 
     val host = InetAddress.getLocalHost.getHostAddress
-    val port = 5000
+    val port = modelListenerPort
 
     implicit val system = ActorSystem("WeatherDataIngester")
     implicit val materializer = ActorMaterializer()

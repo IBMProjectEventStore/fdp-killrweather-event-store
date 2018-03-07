@@ -6,12 +6,14 @@ import akka.actor.ActorSystem
 import akka.kafka.ProducerSettings
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.Source
-import com.lightbend.killrweather.utils.RawWeatherData
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.kafka.common.serialization.ByteArraySerializer
 import akka.kafka.scaladsl.Producer
-import com.lightbend.killrweather.WeatherClient.WeatherRecord
+import com.google.protobuf.ByteString
+import com.lightbend.killrweather.modellistener.resources.ModelSubmissionData
 import com.lightbend.killrweather.settings.WeatherSettings._
+import com.lightbend.model.modeldescriptor.ModelDescriptor
+import com.lightbend.model.modeldescriptor.ModelDescriptor.ModelType
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -29,10 +31,11 @@ class RequestService(implicit executionContext: ExecutionContext, materializer: 
   val producerSettings = ProducerSettings(system, new ByteArraySerializer, new ByteArraySerializer)
     .withBootstrapServers(kafkaBrokers)
 
-  def processRequest(report: RawWeatherData): Future[Unit] = Future {
+  def processRequest(model: ModelSubmissionData): Future[Unit] = Future {
     //    Source.single(report).runWith(Sink.foreach(println))
-    val _ = Source.single(report).map { r =>
-      new ProducerRecord[Array[Byte], Array[Byte]](KafkaTopicRaw, convertRecord(r))
+    println(s"Model Listener new request for wsid ${model.wsid} with PMML ${model.pmml}")
+    val _ = Source.single(model).map { m =>
+      new ProducerRecord[Array[Byte], Array[Byte]](KafkaTopicModel, convertModel(m))
     }.runWith(Producer.plainSink(producerSettings))
   }
 }
@@ -43,11 +46,10 @@ object RequestService {
 
   def apply(implicit executionContext: ExecutionContext, materializer: ActorMaterializer, system: ActorSystem): RequestService = new RequestService()
 
-  def convertRecord(report: RawWeatherData): Array[Byte] = {
+  def convertModel(model: ModelSubmissionData): Array[Byte] = {
     bos.reset
-    WeatherRecord(report.wsid, report.year, report.month, report.day, report.hour, 0l, report.temperature,
-      report.dewpoint, report.pressure, report.windDirection, report.windSpeed, report.skyCondition,
-      report.skyConditionText, report.oneHourPrecip, report.sixHourPrecip).writeTo(bos)
+    new ModelDescriptor().withName("Provided by DSX").withDescription("Provided by DSX")
+        .withDataType(model.wsid).withModeltype(ModelType.PMML).withData(ByteString.copyFrom(model.pmml.getBytes)).writeTo(bos)
     bos.toByteArray
   }
 }

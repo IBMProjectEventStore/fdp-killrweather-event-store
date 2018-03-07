@@ -54,6 +54,13 @@ final object WeatherSettings{
   }
   println(s"Using EventStore: $eventStore")
 
+  // Event Store
+  val modelListenerPort = sys.env.get("modellistener.port") match {
+    case Some(kb) => kb.toInt
+    case None => 5000 // default
+  }
+  println(s"Using EventStore: $eventStore")
+
   val DBNAME = "KillrWeather"
 
   val RAWWEATHER = "raw_weather_data"

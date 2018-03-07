@@ -43,8 +43,10 @@ class PMMLModel(inputStream: Array[Byte]) extends Model {
   override def score(input : Any): Any = {
     val record = input.asInstanceOf[TemperaturePredictionInput]
     arguments.clear()
+    var i = 0
     inputFields.foreach(field => {
-      arguments.put(field.getName, field.prepare(getValueByName(record, field.getName.getValue)))
+      arguments.put(field.getName, field.prepare(record.temps(i)))
+      i = i + 1
     })
 
     // Calculate Output// Calculate Output
@@ -58,15 +60,6 @@ class PMMLModel(inputStream: Array[Byte]) extends Model {
   }
 
   override def cleanup(): Unit = {}
-
-  private def getValueByName(input: TemperaturePredictionInput, name: String): Double =
-    PMMLModel.names.get(name) match {
-      case Some(index) => {.0
-//        val v = input.getFieldByNumber(index + 1)
-//        v.asInstanceOf[Double]
-      }
-      case _ => .0
-    }
 
   override def toBytes: Array[Byte] = {
     var stream = new ByteArrayOutputStream()
@@ -93,12 +86,6 @@ object PMMLModel extends ModelFactory {
         }
       })
   }
-  private val names = Map(
-    "fixed acidity" -> 0,
-    "volatile acidity" -> 1, "citric acid" -> 2, "residual sugar" -> 3,
-    "chlorides" -> 4, "free sulfur dioxide" -> 5, "total sulfur dioxide" -> 6,
-    "density" -> 7, "pH" -> 8, "sulphates" -> 9, "alcohol" -> 10
-  )
 
   override def create(input: ModelToServe): Model = {
       new PMMLModel(input.model)
