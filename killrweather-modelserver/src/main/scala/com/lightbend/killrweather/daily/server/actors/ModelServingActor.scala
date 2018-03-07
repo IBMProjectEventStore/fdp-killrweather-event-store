@@ -54,7 +54,7 @@ class ModelServingActor(dataType : String) extends Actor {
       currentModel match {
         case Some(model) if(haveTemperatures()) =>
           val start = System.nanoTime()
-          val prediction = model.score(TemperaturePredictionInput(temperatures(0).get, temperatures(1).get, temperatures(2).get)).asInstanceOf[Double]
+          val prediction = model.score(TemperaturePredictionInput(temperatures.map(_.get))).asInstanceOf[Double]
           val duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start)
           currentState = currentState.map(_.incrementUsage(duration))
           sender() ! ServingResult(prediction, duration, record.wsid, record.ts)
