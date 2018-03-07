@@ -30,12 +30,12 @@ object KillrWeatherEventStore {
     // Create context
 
     import WeatherSettings._
-
+/*
     // Initialize Event Store
     val ctx = EventStoreSupport.createContext(eventStore, user, password)
     ctx.foreach(EventStoreSupport.ensureTables(_))
     println(s"Event Store initialised")
-
+*/
     // Create embedded Kafka and topic
     if(localKafkaBrokers) {
       val kafka = KafkaLocalServer(true)
@@ -69,6 +69,7 @@ object KillrWeatherEventStore {
     val monthlyRDD = ssc.sparkContext.emptyRDD[(String, ListBuffer[DailyWeatherDataProcess])]
 
     // Create broadcast variable for the sink definition
+
     val eventStoreSink = spark.sparkContext.broadcast(EventStoreSink(eventStore, user, password))
     val kafkaSinkProps = MessageProducer.producerProperties(kafkaBrokers,
       classOf[ByteArraySerializer].getName, classOf[ByteArraySerializer].getName)
@@ -81,7 +82,7 @@ object KillrWeatherEventStore {
     val rawStream = kafkaDataStream.map(r => WeatherRecord.parseFrom(r.value()))
 
     /** Saves the raw data to Event Store - raw table. */
-    rawStream.foreachRDD {spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeRaw(_)) }
+//    rawStream.foreachRDD {spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeRaw(_)) }
 
     // Calculate daily
     val dailyMappingFunc = (station: String, reading: Option[WeatherRecord], state: State[ListBuffer[WeatherRecord]]) => {
@@ -125,7 +126,7 @@ object KillrWeatherEventStore {
 
     //  Write dayly temperature to Kafka
     dailyStream.map(ds => KafkaDataConvertor.toGPB(ds._2)).foreachRDD(_.foreach(kafkaSink.value.send(KafkaTopicDaily, _)))
-
+/*
     // Save daily temperature
     dailyStream.map(ds => DailyTemperature(ds._2))
       .foreachRDD { spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeDailyTemperature(_)) }
@@ -141,7 +142,7 @@ object KillrWeatherEventStore {
     // Save daily presipitations
     dailyStream.map(ds => DailyPrecipitation(ds._2))
       .foreachRDD { spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeDailyPresip(_)) }
-
+*/
     // Calculate monthly
     val monthlyMappingFunc = (station: String, reading: Option[DailyWeatherDataProcess], state: State[ListBuffer[DailyWeatherDataProcess]]) => {
       val current = state.getOption().getOrElse(new ListBuffer[DailyWeatherDataProcess])

@@ -41,8 +41,11 @@ final object WeatherSettings{
   println(s"Using Kafka Brokers: $kafkaBrokers")
 
   val KafkaGroupId = "killrweather.group"
+  val KafkaModelGroupId = "killrweather.model"
+  val KafkaModelDataGroupId = "killrweather.dayly"
   val KafkaTopicRaw = "killrweather.raw"
   val KafkaTopicDaily = "killrweather.dayly"
+  val KafkaTopicModel = "killrweather.model"
 
   // Event Store
   val eventStore = sys.env.get("eventstore.endpoint") match {
@@ -71,6 +74,8 @@ final object WeatherSettings{
   val DAYLYWIND = "daily_aggregate_windspeed"
   val DAYLYPRESS = "daily_aggregate_pressure"
   val DAYLYPRECIP = "daily_aggregate_precip"
+
+  val PREDICTTEMP = "daily_predicted_temperature"
 
   val MONTHLYTEMP = "monthly_aggregate_temperature"
   val MONTHLYWIND = "monthly_aggregate_windspeed"

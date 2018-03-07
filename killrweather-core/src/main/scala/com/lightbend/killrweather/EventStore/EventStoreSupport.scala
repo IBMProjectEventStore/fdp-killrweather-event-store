@@ -71,6 +71,17 @@ object EventStoreSupport {
     shardingColumns = Seq("year", "month"),
     pkColumns = Seq("year", "month", "day"))
 
+  val daily_predicted_temperature = TableSchema(PREDICTTEMP, StructType(Array(
+    StructField("wsid", StringType, nullable = false),
+    StructField("year", IntegerType, nullable = false),
+    StructField("month", IntegerType, nullable = false),
+    StructField("day", IntegerType, nullable = false),
+    StructField("ts", LongType, nullable = false),
+    StructField("prediction", DoubleType, nullable = false)
+  )),
+    shardingColumns = Seq("year", "month"),
+    pkColumns = Seq("year", "month", "day"))
+
   val daily_aggregate_windspeed = TableSchema(DAYLYWIND, StructType(Array(
     StructField("wsid", StringType, nullable = false),
     StructField("year", IntegerType, nullable = false),
@@ -178,7 +189,8 @@ object EventStoreSupport {
     MONTHLYTEMP -> monthly_aggregate_temperature,
     MONTHLYWIND -> monthly_aggregate_windspeed,
     MONTHLYPRESS -> monthly_aggregate_pressure,
-    MONTHLYPRECIP -> monthly_aggregate_precip
+    MONTHLYPRECIP -> monthly_aggregate_precip,
+    PREDICTTEMP -> daily_predicted_temperature
   )
 
   def createContext(connectionEndpoints: String, user: String, password: String): Option[EventContext] = {
