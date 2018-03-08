@@ -9,16 +9,16 @@ package com.lightbend.killrweather.modellistener
 
 import java.net.InetAddress
 
-import akka.http.scaladsl.server.Route
-
-import scala.concurrent.duration._
 import akka.actor._
 import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.lightbend.killrweather.modellistener.resources.TemperaturePredictionModelResource
 import com.lightbend.killrweather.modellistener.services.RequestService
 import com.lightbend.killrweather.settings.WeatherSettings._
+
+import scala.concurrent.duration._
 
 object TemperaturePredictionModel extends TemperaturePredictionModelResource {
 
