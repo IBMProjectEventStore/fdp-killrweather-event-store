@@ -72,9 +72,9 @@ class EventStoreSink(createContext: () => Option[EventContext]) extends Serializ
 
     // write
     val dataSeq = data.toIndexedSeq
-    println(s"Inserting a new batch ${dataSeq.size}, table $tableName context = ${ctx.getOrElse(null)}  !!!!!!!")
     val start = System.currentTimeMillis()
     if (dataSeq.size > 0) {
+        println(s"Inserting a new batch ${dataSeq.size}, table $tableName context = ${ctx.getOrElse(null)}  !!!!!!!")
         try {
           val table = ctx.get.getTable(tableName)
           val future: Future[InsertResult] = ctx.get.batchInsertAsync(table, dataSeq)
@@ -87,8 +87,7 @@ class EventStoreSink(createContext: () => Option[EventContext]) extends Serializ
             printf(s"Error writing to eventStore $t")
             ctx = None
         }
-      }
-//    })
-    println(s"Done inserting batch, table $tableName  in ${System.currentTimeMillis() - start} !!!!!!!")
+        println(s"Done inserting batch, table $tableName  in ${System.currentTimeMillis() - start} !!!!!!!")
+    }
   }
 }

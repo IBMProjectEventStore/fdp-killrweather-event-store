@@ -17,6 +17,7 @@ import org.apache.spark.streaming.kafka010.KafkaUtils
 import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
 import org.apache.spark.streaming.{Seconds, State, StateSpec, StreamingContext}
 import org.apache.spark.util.StatCounter
+import org.apache.log4j.{Level, LogManager}
 
 import scala.collection.mutable.ListBuffer
 
@@ -28,8 +29,11 @@ object KillrWeatherEventStore {
   def main(args: Array[String]): Unit = {
 
     // Create context
-
     import WeatherSettings._
+
+    // Enable Logging for the Event Store
+    //LogManager.getLogger("com.ibm.event").setLevel(Level.DEBUG)
+    //LogManager.getLogger("org.apache.spark.sql.ibm.event").setLevel(Level.DEBUG)
 
     // Initialize Event Store
     val ctx = EventStoreSupport.createContext(eventStore, user, password)
