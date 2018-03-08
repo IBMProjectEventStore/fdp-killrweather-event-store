@@ -1,5 +1,7 @@
 package com.lightbend.killrweather.daily.server.modelserver
 
+import java.util.Calendar
+
 import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
@@ -11,11 +13,15 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.common.serialization.ByteArrayDeserializer
 import akka.pattern.ask
 import akka.stream.scaladsl.Sink
+import com.ibm.event.catalog.ResolvedTableSchema
+import com.ibm.event.oltp.EventContext
+import com.lightbend.killrweather.EventStore.EventStoreSupport
 import com.lightbend.killrweather.daily.model.{DataRecord, ModelToServe, ServingResult}
 import com.lightbend.killrweather.daily.server.actors.ModelServingManager
 import com.lightbend.killrweather.daily.server.queryablestate.QueriesAkkaHttpResource
 import com.lightbend.killrweather.settings.WeatherSettings._
 import com.lightbend.scala.modelServer.model.ModelWithDescriptor
+import org.apache.spark.sql.Row
 
 import scala.concurrent.duration._
 import scala.util.Success
@@ -26,11 +32,13 @@ import scala.util.Success
 object AkkaModelServer {
 
 
-
   implicit val system = ActorSystem("ModelServing")
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
   implicit val askTimeout = Timeout(30.seconds)
+
+  var ctx : Option[EventContext] = None
+  var table : ResolvedTableSchema = null
 
   println(s"Using kafka brokers at ${kafkaBrokers} ")
 
@@ -71,6 +79,22 @@ object AkkaModelServer {
 
     // Rest Server
     startRest(modelserver)
+  }
+
+  def writeToES(result : ServingResult) : Unit = {
+    if(!ctx.isDefined) {
+      ctx = EventStoreSupport.createContext(eventStore, user, password)
+      table = ctx.get.getTable(PREDICTTEMP)
+    }
+    val date = Calendar.getInstance()
+    date.setTimeInMillis(result.ts)
+    val row = Row(result.wsid, date.get(Calendar.YEAR), date.get(Calendar.MONTH), date.get(Calendar.DAY_OF_MONTH), result.ts, result.result)
+    ctx.get.insert(table, row) match {
+      case res if (res.failed) =>
+        println(s"Failed to insert prediction ${res.toString()}")
+        ctx = None
+      case _ =>
+    }
   }
 
   // See http://localhost:5500/models

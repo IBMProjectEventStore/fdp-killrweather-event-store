@@ -54,7 +54,7 @@ lazy val appLocalRunner = (project in file("./killrweather-app-local"))
     libraryDependencies ++= spark.map(_.copy(configurations = Option("compile")))
   )
   .settings(dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-core"  % "2.6.7",
-    dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.7")
+            dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.7")
   .dependsOn(killrWeatherApp)
 
 
@@ -90,8 +90,13 @@ lazy val modelserver = (project in file("./killrweather-modelserver"))
     deployArtifacts ++= Seq(
       ArtifactSSH((packageZipTarball in Universal).value, "/var/www/html/")
     ),
-    libraryDependencies ++= model
+    libraryDependencies ++= model ++ spark.map(_.copy(configurations = Option("compile")))
   )
+  .settings(dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-core"  % "2.6.7",
+            dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.7")
+
+
+
   .dependsOn(killrWeatherCore, protobufs)
   .enablePlugins(DeploySSH)
   .enablePlugins(JavaAppPackaging)
