@@ -5,7 +5,10 @@
   "cpus": 2,
   "mem": 4096,
   "env":{
-    "kafka.brokers":"broker.kafka.l4lb.thisdcos.directory:9092"
+    "kafka.brokers":"broker.kafka.l4lb.thisdcos.directory:9092",
+    "eventstore.endpoint":"34.209.157.114:1101,34.218.120.56:1101,52.37.69.15:1101",
+    "eventstore.user" : "admin",
+    "eventstore.password" : "Lightbend_2018_IBM"
   },
   "fetch": [
     {
