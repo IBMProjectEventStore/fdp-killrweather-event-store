@@ -10,6 +10,9 @@ import scala.util.Try
 object DataRecord {
 
   def fromByteArray(message: Array[Byte]): Try[TemperatureDailyRecord] = Try {
-    TemperatureDailyRecord.parseFrom(message)
+    TemperatureDailyRecord.parseFrom(message) match {
+      case r if(r.wsid.isEmpty) => throw new Exception("got empty record")
+      case r => r
+    }
   }
 }

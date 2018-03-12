@@ -23,6 +23,8 @@ import scala.collection._
  */
 class PMMLModel(inputStream: Array[Byte]) extends Model {
 
+  import PMMLModel._
+
   var arguments = mutable.Map[FieldName, FieldValue]()
 
   // Marshall PMML
@@ -43,11 +45,7 @@ class PMMLModel(inputStream: Array[Byte]) extends Model {
   override def score(input : Any): Any = {
     val record = input.asInstanceOf[TemperaturePredictionInput]
     arguments.clear()
-    var i = 0
-    inputFields.foreach(field => {
-      arguments.put(field.getName, field.prepare(record.temps(i)))
-      i = i + 1
-    })
+    inputFields.foreach(field => arguments.put(field.getName, field.prepare(getValue(field.getName.getValue, record.temps))))
 
     // Calculate Output// Calculate Output
     val result = evaluator.evaluate(arguments)
@@ -85,6 +83,13 @@ object PMMLModel extends ModelFactory {
           throw t
         }
       })
+  }
+
+  def getValue(name : String, temps : Array[Double]) = name match {
+    case n if (n.equals("day-1")) => temps(0)
+    case n if (n.equals("day-2")) => temps(1)
+    case n if (n.equals("day-3")) => temps(2)
+    case _ => 0.0
   }
 
   override def create(input: ModelToServe): Model = {
