@@ -64,8 +64,8 @@ class EventStoreSink(createContext: () => Option[EventContext]) extends Serializ
 
   private def writeBatch(tableName : String, data: Iterator[Row]) : Unit = {
     // Ensure that  that we are connected
-    if (!ctx.isDefined){
-      println(s"reqreating  !!!!!!!")
+    if (!ctx.isDefined) {
+      println(s"Recreating the Event Store Context!!!")
       ctx = EventStoreSupport.createContext(eventStore, user, password)
       EventStoreSupport.ensureTables(ctx.get)
     }
