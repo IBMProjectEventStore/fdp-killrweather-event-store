@@ -1,5 +1,6 @@
 package com.lightbend.killrweather.daily.server.modelserver
 
+import java.net.InetAddress
 import java.util.Calendar
 
 import akka.actor.{ActorRef, ActorSystem}
@@ -71,8 +72,8 @@ object AkkaModelServer {
         result.processed match {
           case true => {
             val date = TempDate(result.ts)
-            println(s"Calculated temperature - ${result.result} for ${date.year}-${date.month}-${date.day} calculated in ${result.duration} ms")
-            // Write to ES
+            println(s"Calculated temperature - ${result.result} for station : ${result.wsid} for ${date.year}-${date.month}-${date.day} calculated in ${result.duration} ms")
+            writeToES(result)
           }
           case _ => println ("No model available - skipping")
         }
@@ -88,14 +89,16 @@ object AkkaModelServer {
       ctx = EventStoreSupport.createContext(eventStore, user, password)
       table = ctx.get.getTable(PREDICTTEMP)
     }
+    val start = System.currentTimeMillis()
     val date = TempDate(result.ts)
-    val row = Row(result.wsid, date.year, date.month, date.day, result.ts, result.result)
+    val row = Row(result.wsid.replace("_", ":"), date.year, date.month, date.day, result.ts, result.result)
     ctx.get.insert(table, row) match {
       case res if (res.failed) =>
         println(s"Failed to insert prediction ${res.toString()}")
         ctx = None
       case _ =>
     }
+    println(s"Inserted prediction record in ES in ${System.currentTimeMillis() - start}")
   }
 
   // See http://localhost:5500/models
@@ -103,7 +106,7 @@ object AkkaModelServer {
   def startRest(modelserver: ActorRef): Unit = {
 
     implicit val timeout = Timeout(10.seconds)
-    val host = "127.0.0.1"
+    val host = InetAddress.getLocalHost.getHostAddress
     val port = 5500
     val routes: Route = QueriesAkkaHttpResource.storeRoutes(modelserver)
 
