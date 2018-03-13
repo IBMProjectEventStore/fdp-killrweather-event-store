@@ -1,6 +1,6 @@
 package com.lightbend.killrweather.EventStore
 
-import com.ibm.event.catalog.{ /*ColumnOrder, IndexSpecification, SortSpecification,*/ TableSchema }
+import com.ibm.event.catalog.{IndexSpecification, TableSchema}
 import com.ibm.event.common.ConfigurationReader
 import com.ibm.event.oltp.EventContext
 import org.apache.spark.sql.types._
@@ -40,8 +40,11 @@ object EventStoreSupport {
     StructField("one_hour_precip", DoubleType, nullable = false),
     StructField("six_hour_precip", DoubleType, nullable = false)
   )),
-    shardingColumns = Seq("year", "month", "day"),
-    pkColumns = Seq("year", "month", "day", "hour"))
+    shardingColumns = Seq("ts"),
+    pkColumns = Seq("ts"))
+  //val raw_weather_data_index = IndexSpecification("RawWeatherDataIndex", raw_weather_data, equalColumns = Seq("ts"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)))
+  val raw_weather_data_index = IndexSpecification("RawWeatherDataIndex", raw_weather_data, equalColumns = Seq("ts"))
+
   /*
   val indexSpec = IndexSpecification("pkindex",
     raw_weather_data,
@@ -68,8 +71,10 @@ object EventStoreSupport {
     StructField("variance", DoubleType, nullable = false),
     StructField("stdev", DoubleType, nullable = false)
   )),
-    shardingColumns = Seq("year", "month"),
-    pkColumns = Seq("year", "month", "day"))
+    shardingColumns = Seq("ts"),
+    pkColumns = Seq("ts"))
+  //val daily_aggregate_temperature_index = IndexSpecification("DailyAggTempIndex", daily_aggregate_temperature, equalColumns = Seq("ts"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)))
+  val daily_aggregate_temperature_index = IndexSpecification("DailyAggTempIndex", daily_aggregate_temperature, equalColumns = Seq("ts"))
 
   val daily_predicted_temperature = TableSchema(PREDICTTEMP, StructType(Array(
     StructField("wsid", StringType, nullable = false),
@@ -79,8 +84,10 @@ object EventStoreSupport {
     StructField("ts", LongType, nullable = false),
     StructField("prediction", DoubleType, nullable = false)
   )),
-    shardingColumns = Seq("year", "month"),
-    pkColumns = Seq("year", "month", "day"))
+    shardingColumns = Seq("ts"),
+    pkColumns = Seq("ts"))
+  //val daily_predicted_temperature_index = IndexSpecification("DailyPreTempIndex", daily_predicted_temperature, equalColumns = Seq("ts"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)))
+  val daily_predicted_temperature_index = IndexSpecification("DailyPreTempIndex", daily_predicted_temperature, equalColumns = Seq("ts"))
 
   val daily_aggregate_windspeed = TableSchema(DAYLYWIND, StructType(Array(
     StructField("wsid", StringType, nullable = false),
@@ -94,8 +101,10 @@ object EventStoreSupport {
     StructField("variance", DoubleType, nullable = false),
     StructField("stdev", DoubleType, nullable = false)
   )),
-    shardingColumns = Seq("year", "month"),
-    pkColumns = Seq("year", "month", "day"))
+    shardingColumns = Seq("ts"),
+    pkColumns = Seq("ts"))
+  //val daily_aggregate_windspeed_index = IndexSpecification("DailyAggWindIndex", daily_aggregate_windspeed, equalColumns = Seq("ts"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)))
+  val daily_aggregate_windspeed_index = IndexSpecification("DailyAggWindIndex", daily_aggregate_windspeed, equalColumns = Seq("ts"))
 
   val daily_aggregate_pressure = TableSchema(DAYLYPRESS, StructType(Array(
     StructField("wsid", StringType, nullable = false),
@@ -109,8 +118,10 @@ object EventStoreSupport {
     StructField("variance", DoubleType, nullable = false),
     StructField("stdev", DoubleType, nullable = false)
   )),
-    shardingColumns = Seq("year", "month"),
-    pkColumns = Seq("year", "month", "day"))
+    shardingColumns = Seq("ts"),
+    pkColumns = Seq("ts"))
+  //val daily_aggregate_pressure_index = IndexSpecification("DailyAggPressureIndex", daily_aggregate_pressure, equalColumns = Seq("ts"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)))
+  val daily_aggregate_pressure_index = IndexSpecification("DailyAggPressureIndex", daily_aggregate_pressure, equalColumns = Seq("ts"))
 
   val daily_aggregate_precip = TableSchema(DAYLYPRECIP, StructType(Array(
     StructField("wsid", StringType, nullable = false),
@@ -120,8 +131,10 @@ object EventStoreSupport {
     StructField("ts", LongType, nullable = false),
     StructField("precipitation", DoubleType, nullable = false)
   )),
-    shardingColumns = Seq("year", "month"),
-    pkColumns = Seq("year", "month", "day"))
+    shardingColumns = Seq("ts"),
+    pkColumns = Seq("ts"))
+  //val daily_aggregate_precip_index = IndexSpecification("DailyAggPrecipIndex", daily_aggregate_precip, equalColumns = Seq("ts"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)))
+  val daily_aggregate_precip_index = IndexSpecification("DailyAggPrecipIndex", daily_aggregate_precip, equalColumns = Seq("ts"))
 
   val monthly_aggregate_temperature = TableSchema(MONTHLYTEMP, StructType(Array(
     StructField("wsid", StringType, nullable = false),
@@ -134,8 +147,10 @@ object EventStoreSupport {
     StructField("variance", DoubleType, nullable = false),
     StructField("stdev", DoubleType, nullable = false)
   )),
-    shardingColumns = Seq("year"),
-    pkColumns = Seq("year", "month"))
+    shardingColumns = Seq("ts"),
+    pkColumns = Seq("ts"))
+  //val monthly_aggregate_temperature_index = IndexSpecification("MonthlyAggTempIndex", monthly_aggregate_temperature, equalColumns = Seq("ts"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)))
+  val monthly_aggregate_temperature_index = IndexSpecification("MonthlyAggTempIndex", monthly_aggregate_temperature, equalColumns = Seq("ts"))
 
   val monthly_aggregate_windspeed = TableSchema(MONTHLYWIND, StructType(Array(
     StructField("wsid", StringType, nullable = false),
@@ -148,8 +163,10 @@ object EventStoreSupport {
     StructField("variance", DoubleType, nullable = false),
     StructField("stdev", DoubleType, nullable = false)
   )),
-    shardingColumns = Seq("year"),
-    pkColumns = Seq("year", "month"))
+    shardingColumns = Seq("ts"),
+    pkColumns = Seq("ts"))
+  //val monthly_aggregate_windspeed_index = IndexSpecification("MonthlyAggWindIndex", monthly_aggregate_windspeed, equalColumns = Seq("ts"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)))
+  val monthly_aggregate_windspeed_index = IndexSpecification("MonthlyAggWindIndex", monthly_aggregate_windspeed, equalColumns = Seq("ts"))
 
   val monthly_aggregate_pressure = TableSchema(MONTHLYPRESS, StructType(Array(
     StructField("wsid", StringType, nullable = false),
@@ -162,8 +179,10 @@ object EventStoreSupport {
     StructField("variance", DoubleType, nullable = false),
     StructField("stdev", DoubleType, nullable = false)
   )),
-    shardingColumns = Seq("year"),
-    pkColumns = Seq("year", "month"))
+    shardingColumns = Seq("ts"),
+    pkColumns = Seq("ts"))
+  //val monthly_aggregate_pressure_index = IndexSpecification("MonthlyAggPressureIndex", monthly_aggregate_pressure, equalColumns = Seq("ts"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)))
+  val monthly_aggregate_pressure_index = IndexSpecification("MonthlyAggPressureIndex", monthly_aggregate_pressure, equalColumns = Seq("ts"))
 
   val monthly_aggregate_precip = TableSchema(MONTHLYPRECIP, StructType(Array(
     StructField("wsid", StringType, nullable = false),
@@ -176,21 +195,24 @@ object EventStoreSupport {
     StructField("variance", DoubleType, nullable = false),
     StructField("stdev", DoubleType, nullable = false)
   )),
-    shardingColumns = Seq("year"),
-    pkColumns = Seq("year", "month"))
+    shardingColumns = Seq("ts"),
+    pkColumns = Seq("ts"))
+  //val monthly_aggregate_precip_index = IndexSpecification("MonthlyAggPrecipIndex", monthly_aggregate_precip, equalColumns = Seq("ts"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)))
+  val monthly_aggregate_precip_index = IndexSpecification("MonthlyAggPrecipIndex", monthly_aggregate_precip, equalColumns = Seq("ts"))
 
-  val tables = Map( //"weather_station" -> weather_station,
-    RAWWEATHER -> raw_weather_data,
-    SKYCONDITIONSLOOKUP -> sky_condition_lookup,
-    DAYLYTEMP -> daily_aggregate_temperature,
-    DAYLYWIND -> daily_aggregate_windspeed,
-    DAYLYPRESS -> daily_aggregate_pressure,
-    DAYLYPRECIP -> daily_aggregate_precip,
-    MONTHLYTEMP -> monthly_aggregate_temperature,
-    MONTHLYWIND -> monthly_aggregate_windspeed,
-    MONTHLYPRESS -> monthly_aggregate_pressure,
-    MONTHLYPRECIP -> monthly_aggregate_precip,
-    PREDICTTEMP -> daily_predicted_temperature
+  val emptyIndex: IndexSpecification = null
+  val tables = Map [String, (TableSchema, IndexSpecification)] (
+    (RAWWEATHER, (raw_weather_data, raw_weather_data_index)),
+    (SKYCONDITIONSLOOKUP, (sky_condition_lookup, emptyIndex)),
+    (DAYLYTEMP, (daily_aggregate_temperature, daily_aggregate_temperature_index)),
+    (DAYLYWIND, (daily_aggregate_windspeed, daily_aggregate_windspeed_index)),
+    (DAYLYPRESS, (daily_aggregate_pressure, daily_aggregate_pressure_index)),
+    (DAYLYPRECIP, (daily_aggregate_precip, daily_aggregate_precip_index)),
+    (MONTHLYTEMP, (monthly_aggregate_temperature, monthly_aggregate_temperature_index)),
+    (MONTHLYWIND, (monthly_aggregate_windspeed, monthly_aggregate_windspeed_index)),
+    (MONTHLYPRESS, (monthly_aggregate_pressure, monthly_aggregate_pressure_index)),
+    (MONTHLYPRECIP, (monthly_aggregate_precip, monthly_aggregate_precip_index)),
+    (PREDICTTEMP, (daily_predicted_temperature, daily_predicted_temperature_index))
   )
 
   def createContext(connectionEndpoints: String, user: String, password: String): Option[EventContext] = {
@@ -237,11 +259,17 @@ object EventStoreSupport {
     val existing = currentTables(ctx)
     println(s"Tables : ${existing.mkString(",")}")
     tables foreach (tabDef => {
-      if (!existing.contains(tabDef._1)) {
-        ctx.createTable(tabDef._2)
+      val tableSchema = tabDef._2._1
+      val index = tabDef._2._2
+      if (!existing.contains(tabDef._1) && index != null) {
+        ctx.createTableWithIndex(tableSchema, index)
+        println(s"Table ${tabDef._1} created with Index")
+      } else if (!existing.contains(tabDef._1)) {
+        ctx.createTable(tableSchema)
         println(s"Table ${tabDef._1} created")
-      } else
+      } else {
         println(s"Table ${tabDef._1} exist")
+      }
     })
   }
 }
