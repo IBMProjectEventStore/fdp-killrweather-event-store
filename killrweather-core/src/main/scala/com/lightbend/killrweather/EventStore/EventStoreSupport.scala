@@ -24,7 +24,7 @@ object EventStoreSupport {
   )
 */
   val raw_weather_data = TableSchema(RAWWEATHER, StructType(Array(
-    StructField("wsid", IntegerType, nullable = false),
+    StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
     StructField("day", IntegerType, nullable = false),
@@ -59,7 +59,7 @@ object EventStoreSupport {
     pkColumns = Seq("code"))
 
   val daily_aggregate_temperature = TableSchema(DAYLYTEMP, StructType(Array(
-    StructField("wsid", IntegerType, nullable = false),
+    StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
     StructField("day", IntegerType, nullable = false),
@@ -75,7 +75,7 @@ object EventStoreSupport {
   val daily_aggregate_temperature_index = IndexSpecification("DailyAggTempIndex", daily_aggregate_temperature, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("high", "low", "mean"))
 
   val daily_predicted_temperature = TableSchema(PREDICTTEMP, StructType(Array(
-    StructField("wsid", IntegerType, nullable = false),
+    StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
     StructField("day", IntegerType, nullable = false),
@@ -87,7 +87,7 @@ object EventStoreSupport {
   val daily_predicted_temperature_index = IndexSpecification("DailyPreTempIndex", daily_predicted_temperature, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("prediction"))
 
   val daily_aggregate_windspeed = TableSchema(DAYLYWIND, StructType(Array(
-    StructField("wsid", IntegerType, nullable = false),
+    StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
     StructField("day", IntegerType, nullable = false),
@@ -103,7 +103,7 @@ object EventStoreSupport {
   val daily_aggregate_windspeed_index = IndexSpecification("DailyAggWindIndex", daily_aggregate_windspeed, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("high", "low", "mean"))
 
   val daily_aggregate_pressure = TableSchema(DAYLYPRESS, StructType(Array(
-    StructField("wsid", IntegerType, nullable = false),
+    StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
     StructField("day", IntegerType, nullable = false),
@@ -119,7 +119,7 @@ object EventStoreSupport {
   val daily_aggregate_pressure_index = IndexSpecification("DailyAggPressureIndex", daily_aggregate_pressure, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("high", "low", "mean"))
 
   val daily_aggregate_precip = TableSchema(DAYLYPRECIP, StructType(Array(
-    StructField("wsid", IntegerType, nullable = false),
+    StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
     StructField("day", IntegerType, nullable = false),
@@ -131,7 +131,7 @@ object EventStoreSupport {
   val daily_aggregate_precip_index = IndexSpecification("DailyAggPrecipIndex", daily_aggregate_precip, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("precipitation"))
 
   val monthly_aggregate_temperature = TableSchema(MONTHLYTEMP, StructType(Array(
-    StructField("wsid", IntegerType, nullable = false),
+    StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
     StructField("ts", LongType, nullable = false),
@@ -146,7 +146,7 @@ object EventStoreSupport {
   val monthly_aggregate_temperature_index = IndexSpecification("MonthlyAggTempIndex", monthly_aggregate_temperature, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("high", "low", "mean"))
 
   val monthly_aggregate_windspeed = TableSchema(MONTHLYWIND, StructType(Array(
-    StructField("wsid", IntegerType, nullable = false),
+    StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
     StructField("ts", LongType, nullable = false),
@@ -161,7 +161,7 @@ object EventStoreSupport {
   val monthly_aggregate_windspeed_index = IndexSpecification("MonthlyAggWindIndex", monthly_aggregate_windspeed, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("high", "low", "mean"))
 
   val monthly_aggregate_pressure = TableSchema(MONTHLYPRESS, StructType(Array(
-    StructField("wsid", IntegerType, nullable = false),
+    StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
     StructField("ts", LongType, nullable = false),
@@ -176,7 +176,7 @@ object EventStoreSupport {
   val monthly_aggregate_pressure_index = IndexSpecification("MonthlyAggPressureIndex", monthly_aggregate_pressure, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("high", "low", "mean"))
 
   val monthly_aggregate_precip = TableSchema(MONTHLYPRECIP, StructType(Array(
-    StructField("wsid", IntegerType, nullable = false),
+    StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
     StructField("ts", LongType, nullable = false),

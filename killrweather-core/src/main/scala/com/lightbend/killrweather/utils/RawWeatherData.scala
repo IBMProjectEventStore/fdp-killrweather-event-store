@@ -17,7 +17,7 @@ package com.lightbend.killrweather.utils
  * @param sixHourPrecip Six-hour accumulated liquid precipitation (millimeters)
  */
 case class RawWeatherData(
-  wsid: String,
+  wsid: Long,
   year: Int,
   month: Int,
   day: Int,
@@ -37,7 +37,7 @@ object RawWeatherData {
   /** Tech debt - don't do it this way ;) */
   def apply(array: Array[String]): RawWeatherData = {
     RawWeatherData(
-      wsid = array(0),
+      wsid = array(0).toLong,
       year = array(1).toInt,
       month = array(2).toInt,
       day = array(3).toInt,

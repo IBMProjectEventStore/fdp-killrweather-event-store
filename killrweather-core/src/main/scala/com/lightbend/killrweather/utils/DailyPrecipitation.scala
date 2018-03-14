@@ -4,7 +4,7 @@ package com.lightbend.killrweather.utils
  * Created by boris on 7/19/17.
  */
 case class DailyPrecipitation(
-  wsid: String,
+  wsid: Long,
   year: Int,
   month: Int,
   day: Int,
@@ -17,7 +17,7 @@ object DailyPrecipitation {
 }
 
 case class MonthlyPrecipitation(
-  wsid: String,
+  wsid: Long,
   year: Int,
   month: Int,
   ts: Long,
