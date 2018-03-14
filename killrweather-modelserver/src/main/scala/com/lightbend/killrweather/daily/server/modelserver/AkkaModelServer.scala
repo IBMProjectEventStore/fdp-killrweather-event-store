@@ -24,6 +24,7 @@ import com.lightbend.killrweather.settings.WeatherSettings._
 import com.lightbend.scala.modelServer.model.ModelWithDescriptor
 import org.apache.spark.sql.Row
 
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.Success
 
@@ -67,6 +68,7 @@ object AkkaModelServer {
     // Data stream processing
     Consumer.atMostOnceSource(dataConsumerSettings, Subscriptions.topics(KafkaTopicDaily))
       .map(record => DataRecord.fromByteArray(record.value())).collect { case Success(a) => a }
+      .map{record => println(s"Processing record $record") ; record}
       .mapAsync(1)(elem => (modelserver ? elem).mapTo[ServingResult])
       .runForeach(result => {
         result.processed match {
@@ -92,13 +94,18 @@ object AkkaModelServer {
     val start = System.currentTimeMillis()
     val date = TempDate(result.ts)
     val row = Row(result.wsid, date.year, date.month, date.day, result.ts, result.result)
-    ctx.get.insert(table, row) match {
-      case res if (res.failed) =>
-        println(s"Failed to insert prediction ${res.toString()}")
+    try {
+      val future = ctx.get.insertAsync(table, row)
+      val insertResult = Await.result(future, Duration.apply(1, SECONDS))
+      if (insertResult.failed) {
+        println(s"batch insert failed: $insertResult")
+      }
+    } catch {
+      case t: Throwable =>
+        printf(s"Error writing to eventStore $t")
         ctx = None
-      case _ =>
     }
-    println(s"Inserted prediction record in ES in ${System.currentTimeMillis() - start}")
+    println(s"Inserted prediction record $result in ES in ${System.currentTimeMillis() - start}")
   }
 
   // See http://localhost:5500/models
