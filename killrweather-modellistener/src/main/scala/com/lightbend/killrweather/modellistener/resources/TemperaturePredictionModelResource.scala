@@ -27,4 +27,4 @@ trait TemperaturePredictionModelResource extends JSONResource {
   }
 }
 
-case class ModelSubmissionData(wsid: String, pmml : String)
+case class ModelSubmissionData(wsid: Long, pmml : String)

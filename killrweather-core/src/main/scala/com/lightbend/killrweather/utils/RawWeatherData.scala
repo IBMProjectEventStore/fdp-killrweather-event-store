@@ -37,7 +37,7 @@ object RawWeatherData {
   /** Tech debt - don't do it this way ;) */
   def apply(array: Array[String]): RawWeatherData = {
     RawWeatherData(
-      wsid = array(0).toLong,
+      wsid = array(0).replace(":", "").toLong,
       year = array(1).toInt,
       month = array(2).toInt,
       day = array(3).toInt,
