@@ -4,7 +4,7 @@ package com.lightbend.killrweather.utils
  * Created by boris on 7/19/17.
  */
 case class DailyPressure(
-  wsid: String,
+  wsid: Long,
   year: Int,
   month: Int,
   day: Int,
@@ -23,7 +23,7 @@ object DailyPressure {
 }
 
 case class MonthlyPressure(
-  wsid: String,
+  wsid: Long,
   year: Int,
   month: Int,
   ts: Long,

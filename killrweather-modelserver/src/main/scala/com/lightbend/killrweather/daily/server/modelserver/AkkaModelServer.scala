@@ -91,7 +91,7 @@ object AkkaModelServer {
     }
     val start = System.currentTimeMillis()
     val date = TempDate(result.ts)
-    val row = Row(result.wsid.replace("_", ":"), date.year, date.month, date.day, result.ts, result.result)
+    val row = Row(result.wsid, date.year, date.month, date.day, result.ts, result.result)
     ctx.get.insert(table, row) match {
       case res if (res.failed) =>
         println(s"Failed to insert prediction ${res.toString()}")

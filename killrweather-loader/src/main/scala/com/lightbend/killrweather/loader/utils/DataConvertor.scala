@@ -26,7 +26,7 @@ object DataConvertor {
     date.set(report.year, report.month-1, report.day, report.hour, DataConvertorImpl.DEFAULT_HOUR, DataConvertorImpl.DEFAULT_MIN)
     date.add(Calendar.MONTH, MONTHOFFSET)
     WeatherRecord(
-      wsid = report.wsid,
+      wsid = report.wsid.replace(":", "").toLong,
       year = date.get(Calendar.YEAR),
       month = date.get(Calendar.MONTH),
       day = date.get(Calendar.DAY_OF_MONTH),
