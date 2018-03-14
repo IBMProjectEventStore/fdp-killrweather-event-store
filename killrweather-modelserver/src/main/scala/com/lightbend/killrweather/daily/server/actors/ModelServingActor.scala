@@ -59,7 +59,7 @@ class ModelServingActor(dataType : String) extends Actor {
           currentState = currentState.map(_.incrementUsage(duration))
           sender() ! ServingResult(prediction, duration, record.wsid, record.ts)
 
-        case None =>
+        case _ =>
           sender() ! ServingResult.noModel
       }
 

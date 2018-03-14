@@ -26,7 +26,7 @@ object Versions {
   val JDK               = "1.8"
   val JodaConvert       = "1.8.2"
   val JodaTime          = "2.9.9"
-  val Json4s            = "3.2.11"
+  val Json4s            = "3.5.0"
   val Kafka             = "1.0.0"
   val Logback           = "1.2.3"
   val Scala             = "2.11.8"

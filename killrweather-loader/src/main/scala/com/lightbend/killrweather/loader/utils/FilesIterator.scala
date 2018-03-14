@@ -10,7 +10,7 @@ class FilesIterator(file: java.io.File, encoding: String) extends Iterator[Strin
     file.listFiles.foldLeft(Seq.empty[String].toIterator) {
       (s, v) =>
         v.getName match {
-          case name if name.endsWith("csv.gz") => s ++ GzFileIterator(v, encoding)
+//          case name if name.endsWith("csv.gz") => s ++ GzFileIterator(v, encoding)
           case name if name.endsWith("csv.zip") => s ++ ZipFileIterator(v, encoding)
           case name if name.endsWith("csv") => s ++ FileIterator(v, encoding)
           case n => s
