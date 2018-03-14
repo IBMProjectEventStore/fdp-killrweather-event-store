@@ -11,7 +11,7 @@ import com.lightbend.scala.modelServer.model.ModelWithDescriptor
 
 class ModelServingManager extends Actor {
 
-  private def getModelServer(dataType: String): ActorRef = {
+  private def getModelServer(dataType: Int): ActorRef = {
     context.child(dataType).getOrElse(context.actorOf(ModelServingActor.props(dataType), dataType))
   }
 
@@ -29,7 +29,7 @@ class ModelServingManager extends Actor {
 
     case record: TemperatureDailyRecord =>
 //      println(s"Processing record $record")
-      getModelServer(convertDataType(record.wsid)) forward record
+      getModelServer(record.wsid) forward record
 
     case getState: GetState => context.child(getState.dataType) match {
       case Some(server) => server forward getState

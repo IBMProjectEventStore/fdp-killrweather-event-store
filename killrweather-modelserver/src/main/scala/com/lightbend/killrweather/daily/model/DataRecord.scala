@@ -11,7 +11,7 @@ object DataRecord {
 
   def fromByteArray(message: Array[Byte]): Try[TemperatureDailyRecord] = Try {
     TemperatureDailyRecord.parseFrom(message) match {
-      case r if(r.wsid.isEmpty) => throw new Exception("got empty record")
+      case r if(r.wsid == 0) => throw new Exception("got empty record")
       case r => r
     }
   }

@@ -14,7 +14,7 @@ object KafkaDataIngester {
   val file = "data/load/"
   val timeInterval: Long = 1000 * 1 // 1 sec
   val batchInterval: Long = 1000 * 600 // 10 min
-  val batchSize = 10
+  val batchSize = 100
 
   def main(args: Array[String]) {
 
