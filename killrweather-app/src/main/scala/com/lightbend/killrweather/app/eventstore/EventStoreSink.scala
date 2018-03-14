@@ -5,7 +5,7 @@ import com.lightbend.killrweather.EventStore.EventStoreSupport
 import com.lightbend.killrweather.settings.WeatherSettings._
 import org.apache.spark.sql.Row
 
-import scala.concurrent.duration.Duration
+import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 object EventStoreSink {
@@ -78,7 +78,7 @@ class EventStoreSink(createContext: () => Option[EventContext]) extends Serializ
         try {
           //val table = ctx.get.getTable(tableName)
           val future: Future[InsertResult] = ctx.get.batchInsertAsync(tableName, dataSeq, true)
-          val result: InsertResult = Await.result(future, Duration.Inf)
+          val result: InsertResult = Await.result(future, Duration.apply(1, SECONDS))
           if (result.failed) {
             println(s"batch insert incomplete: $result")
           }

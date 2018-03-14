@@ -93,7 +93,7 @@ object AkkaModelServer {
     }
     val start = System.currentTimeMillis()
     val date = TempDate(result.ts)
-    val row = Row(result.wsid, date.year, date.month, date.day, result.ts, result.result)
+    val row = Row(result.wsid, date.year, date.month, date.day, date.ts, result.result)
     try {
       val future = ctx.get.insertAsync(table, row)
       val insertResult = Await.result(future, Duration.apply(1, SECONDS))
@@ -125,12 +125,13 @@ object AkkaModelServer {
   }
 }
 
-case class TempDate(year : Int, month : Int, day : Int)
+case class TempDate(year : Int, month : Int, day : Int, ts : Long)
 
 object TempDate{
+  val DAY = 1000 * 3600 * 24        // Day in millisec
   def apply(ts : Long) : TempDate = {
     val date = Calendar.getInstance()
-    date.setTimeInMillis(ts)
-    new TempDate(date.get(Calendar.YEAR), date.get(Calendar.MONTH), date.get(Calendar.DAY_OF_MONTH))
+    date.setTimeInMillis(ts + DAY)
+    TempDate(date.get(Calendar.YEAR),date.get(Calendar.MONTH), date.get(Calendar.DAY_OF_MONTH), date.getTimeInMillis)
   }
 }
