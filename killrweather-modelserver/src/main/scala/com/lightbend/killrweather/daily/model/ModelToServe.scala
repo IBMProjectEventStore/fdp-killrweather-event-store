@@ -20,14 +20,14 @@ object ModelToServe {
 }
 
 case class ModelToServe(name: String, description: String,
-  modelType: ModelDescriptor.ModelType, model: Array[Byte], dataType: String) {}
+  modelType: ModelDescriptor.ModelType, model: Array[Byte], dataType: Long) {}
 
-case class ServingResult(processed : Boolean, result: Double = .0, duration: Long = 0l, wsid : Int = 0, ts : Long = 0l)
+case class ServingResult(processed : Boolean, result: Double = .0, duration: Long = 0l, wsid : Long = 0l, ts : Long = 0l)
 
 object ServingResult{
   val DAY = 1000 * 3600 * 24        // Day in millisec
   val noModel = ServingResult(false)
-  def apply(result: Double, duration: Long, wsid : Int, ts : Long): ServingResult =
+  def apply(result: Double, duration: Long, wsid : Long, ts : Long): ServingResult =
     ServingResult(true, result, duration, wsid, ts)
   def convertTS(result : ServingResult) : (Int, Int, Int, Long) = {
     val date = Calendar.getInstance()

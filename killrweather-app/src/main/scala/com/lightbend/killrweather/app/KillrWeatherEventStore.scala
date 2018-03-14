@@ -17,7 +17,7 @@ import org.apache.spark.streaming.kafka010.KafkaUtils
 import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
 import org.apache.spark.streaming.{Seconds, State, StateSpec, StreamingContext}
 import org.apache.spark.util.StatCounter
-import org.apache.log4j.{Level, LogManager}
+//import org.apache.log4j.{Level, LogManager}
 
 import scala.collection.mutable.ListBuffer
 
@@ -68,10 +68,10 @@ object KillrWeatherEventStore {
     val topics = List(KafkaTopicRaw)
 
     // Initial state RDD for daily accumulator
-    val dailyRDD = ssc.sparkContext.emptyRDD[(String, ListBuffer[WeatherRecord])]
+    val dailyRDD = ssc.sparkContext.emptyRDD[(Long, ListBuffer[WeatherRecord])]
 
     // Initial state RDD for monthly accumulator
-    val monthlyRDD = ssc.sparkContext.emptyRDD[(String, ListBuffer[DailyWeatherDataProcess])]
+    val monthlyRDD = ssc.sparkContext.emptyRDD[(Long, ListBuffer[DailyWeatherDataProcess])]
 
     // Create broadcast variable for the sink definition
 
@@ -90,9 +90,9 @@ object KillrWeatherEventStore {
     rawStream.foreachRDD {spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeRaw(_)) }
 
     // Calculate daily
-    val dailyMappingFunc = (station: String, reading: Option[WeatherRecord], state: State[ListBuffer[WeatherRecord]]) => {
+    val dailyMappingFunc = (station: Long, reading: Option[WeatherRecord], state: State[ListBuffer[WeatherRecord]]) => {
       val current = state.getOption().getOrElse(new ListBuffer[WeatherRecord])
-      var daily: Option[(String, DailyWeatherData)] = None
+      var daily: Option[(Long, DailyWeatherData)] = None
       val last = current.lastOption.getOrElse(null.asInstanceOf[WeatherRecord])
       val ts = Calendar.getInstance()
       reading match {
@@ -149,9 +149,9 @@ object KillrWeatherEventStore {
       .foreachRDD { spark.createDataFrame(_).foreachPartition(eventStoreSink.value.writeDailyPresip(_)) }
 
     // Calculate monthly
-    val monthlyMappingFunc = (station: String, reading: Option[DailyWeatherDataProcess], state: State[ListBuffer[DailyWeatherDataProcess]]) => {
+    val monthlyMappingFunc = (station: Long, reading: Option[DailyWeatherDataProcess], state: State[ListBuffer[DailyWeatherDataProcess]]) => {
       val current = state.getOption().getOrElse(new ListBuffer[DailyWeatherDataProcess])
-      var monthly: Option[(String, MonthlyWeatherData)] = None
+      var monthly: Option[(Long, MonthlyWeatherData)] = None
       val last = current.lastOption.getOrElse(null.asInstanceOf[DailyWeatherDataProcess])
       val ts = Calendar.getInstance()
       reading match {

@@ -10,7 +10,7 @@ message ModelDescriptor {
     // Human readable description.
     string description = 2;
     // Data type for which this model is applied.
-    string dataType = 3;
+    int64 dataType = 3;
     // Model type
     enum ModelType {
         TENSORFLOW  = 0;

@@ -11,12 +11,8 @@ import com.lightbend.scala.modelServer.model.ModelWithDescriptor
 
 class ModelServingManager extends Actor {
 
-  private def getModelServer(dataType: Int): ActorRef = {
-    context.child(dataType).getOrElse(context.actorOf(ModelServingActor.props(dataType), dataType))
-  }
-
-  private def convertDataType(dataType: String) : String = {
-    dataType.replace(":", "_")
+  private def getModelServer(dataType: Long): ActorRef = {
+    context.child(dataType.toString).getOrElse(context.actorOf(ModelServingActor.props(dataType.toString), dataType.toString))
   }
 
   private def getInstances : GetModelsResult =
@@ -24,11 +20,9 @@ class ModelServingManager extends Actor {
 
   override def receive = {
     case model: ModelWithDescriptor =>
-//      println(s"Processing model with descriptor ${model.descriptor}")
-      getModelServer(convertDataType(model.descriptor.dataType)) forward model
+      getModelServer(model.descriptor.dataType) forward model
 
     case record: TemperatureDailyRecord =>
-//      println(s"Processing record $record")
       getModelServer(record.wsid) forward record
 
     case getState: GetState => context.child(getState.dataType) match {
