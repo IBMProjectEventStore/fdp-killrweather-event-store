@@ -92,8 +92,8 @@ lazy val modelserver = (project in file("./killrweather-modelserver"))
     ),
     libraryDependencies ++= model ++ spark.map(_.copy(configurations = Option("compile")))
   )
-  .settings(dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-core"  % "2.6.7",
-            dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.7")
+  .settings(dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-core"  % "2.9.1",
+            dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.9.1")
 
 
 
