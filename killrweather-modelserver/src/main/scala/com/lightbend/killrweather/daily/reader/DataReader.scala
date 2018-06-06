@@ -7,11 +7,12 @@ import org.apache.kafka.common.serialization.ByteArrayDeserializer
 object DataReader {
 
   def main(args: Array[String]) {
-    import WeatherSettings._
+    val settings = WeatherSettings()
+    import settings._
 
-    println(s"Using kafka brokers at $kafkaBrokers")
+    println(s"Using kafka brokers at ${kafkaDaylyConfig.brokers}")
 
-    val listener = MessageListener(kafkaBrokers, KafkaTopicDaily, "GG", classOf[ByteArrayDeserializer].getName, classOf[ByteArrayDeserializer].getName, new RecordProcessor())
+    val listener = MessageListener(kafkaDaylyConfig.brokers, kafkaDaylyConfig.topic, "GG", classOf[ByteArrayDeserializer].getName, classOf[ByteArrayDeserializer].getName, new RecordProcessor())
     listener.start()
   }
 }

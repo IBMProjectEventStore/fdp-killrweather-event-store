@@ -3,11 +3,14 @@ package com.lightbend.killrweather.EventStore
 import com.ibm.event.catalog.{ColumnOrder, IndexSpecification, SortSpecification, TableSchema}
 import com.ibm.event.common.ConfigurationReader
 import com.ibm.event.oltp.EventContext
+import com.lightbend.killrweather.settings.WeatherSettings
 import org.apache.spark.sql.types._
 
 object EventStoreSupport {
 
-  import com.lightbend.killrweather.settings.WeatherSettings._
+  val settings = WeatherSettings()
+  import settings._
+
   /*
   val weather_station = TableSchema("rweather_station", StructType(Array(
     StructField("id", StringType, nullable = false),
@@ -23,7 +26,7 @@ object EventStoreSupport {
     pkColumns = Seq("id")
   )
 */
-  val raw_weather_data = TableSchema(RAWWEATHER, StructType(Array(
+  val raw_weather_data = TableSchema(eventStoreTables.rawWeather, StructType(Array(
     StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -51,14 +54,14 @@ object EventStoreSupport {
     sortColumns=Seq(SortSpecification("timeStamp", ColumnOrder.AscendingNullsLast)),
     includeColumns=Seq("metricValue"))
 */
-  val sky_condition_lookup = TableSchema(SKYCONDITIONSLOOKUP, StructType(Array(
+  val sky_condition_lookup = TableSchema(eventStoreTables.skyConditionsLookup, StructType(Array(
     StructField("code", IntegerType, nullable = false),
     StructField("condition", StringType, nullable = false)
   )),
     shardingColumns = Seq("code"),
     pkColumns = Seq("code"))
 
-  val daily_aggregate_temperature = TableSchema(DAYLYTEMP, StructType(Array(
+  val daily_aggregate_temperature = TableSchema(eventStoreTables.daylyTemperature, StructType(Array(
     StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -74,7 +77,7 @@ object EventStoreSupport {
     pkColumns = Seq("ts", "wsid"))
   val daily_aggregate_temperature_index = IndexSpecification("DailyAggTempIndex", daily_aggregate_temperature, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("high", "low", "mean"))
 
-  val daily_predicted_temperature = TableSchema(PREDICTTEMP, StructType(Array(
+  val daily_predicted_temperature = TableSchema(eventStoreTables.predictedTemperature, StructType(Array(
     StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -86,7 +89,7 @@ object EventStoreSupport {
     pkColumns = Seq("ts", "wsid"))
   val daily_predicted_temperature_index = IndexSpecification("DailyPreTempIndex", daily_predicted_temperature, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("prediction"))
 
-  val daily_aggregate_windspeed = TableSchema(DAYLYWIND, StructType(Array(
+  val daily_aggregate_windspeed = TableSchema(eventStoreTables.daylyWind, StructType(Array(
     StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -102,7 +105,7 @@ object EventStoreSupport {
     pkColumns = Seq("ts", "wsid"))
   val daily_aggregate_windspeed_index = IndexSpecification("DailyAggWindIndex", daily_aggregate_windspeed, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("high", "low", "mean"))
 
-  val daily_aggregate_pressure = TableSchema(DAYLYPRESS, StructType(Array(
+  val daily_aggregate_pressure = TableSchema(eventStoreTables.dailyPressure, StructType(Array(
     StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -118,7 +121,7 @@ object EventStoreSupport {
     pkColumns = Seq("ts", "wsid"))
   val daily_aggregate_pressure_index = IndexSpecification("DailyAggPressureIndex", daily_aggregate_pressure, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("high", "low", "mean"))
 
-  val daily_aggregate_precip = TableSchema(DAYLYPRECIP, StructType(Array(
+  val daily_aggregate_precip = TableSchema(eventStoreTables.dailyPrecipitation, StructType(Array(
     StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -130,7 +133,7 @@ object EventStoreSupport {
     pkColumns = Seq("ts", "wsid"))
   val daily_aggregate_precip_index = IndexSpecification("DailyAggPrecipIndex", daily_aggregate_precip, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("precipitation"))
 
-  val monthly_aggregate_temperature = TableSchema(MONTHLYTEMP, StructType(Array(
+  val monthly_aggregate_temperature = TableSchema(eventStoreTables.monthlyTemperature, StructType(Array(
     StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -145,7 +148,7 @@ object EventStoreSupport {
     pkColumns = Seq("ts", "wsid"))
   val monthly_aggregate_temperature_index = IndexSpecification("MonthlyAggTempIndex", monthly_aggregate_temperature, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("high", "low", "mean"))
 
-  val monthly_aggregate_windspeed = TableSchema(MONTHLYWIND, StructType(Array(
+  val monthly_aggregate_windspeed = TableSchema(eventStoreTables.monthlyWind, StructType(Array(
     StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -160,7 +163,7 @@ object EventStoreSupport {
     pkColumns = Seq("ts", "wsid"))
   val monthly_aggregate_windspeed_index = IndexSpecification("MonthlyAggWindIndex", monthly_aggregate_windspeed, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("high", "low", "mean"))
 
-  val monthly_aggregate_pressure = TableSchema(MONTHLYPRESS, StructType(Array(
+  val monthly_aggregate_pressure = TableSchema(eventStoreTables.monthlyPressure, StructType(Array(
     StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -175,7 +178,7 @@ object EventStoreSupport {
     pkColumns = Seq("ts", "wsid"))
   val monthly_aggregate_pressure_index = IndexSpecification("MonthlyAggPressureIndex", monthly_aggregate_pressure, equalColumns = Seq("wsid"), sortColumns = Seq(SortSpecification("ts", ColumnOrder.AscendingNullsLast)), includeColumns = Seq("high", "low", "mean"))
 
-  val monthly_aggregate_precip = TableSchema(MONTHLYPRECIP, StructType(Array(
+  val monthly_aggregate_precip = TableSchema(eventStoreTables.monthlyPrecipitation, StructType(Array(
     StructField("wsid", LongType, nullable = false),
     StructField("year", IntegerType, nullable = false),
     StructField("month", IntegerType, nullable = false),
@@ -192,17 +195,17 @@ object EventStoreSupport {
 
   val emptyIndex: IndexSpecification = null
   val tables = Map [String, (TableSchema, IndexSpecification)] (
-    (RAWWEATHER, (raw_weather_data, raw_weather_data_index)),
-    (SKYCONDITIONSLOOKUP, (sky_condition_lookup, emptyIndex)),
-    (DAYLYTEMP, (daily_aggregate_temperature, daily_aggregate_temperature_index)),
-    (DAYLYWIND, (daily_aggregate_windspeed, daily_aggregate_windspeed_index)),
-    (DAYLYPRESS, (daily_aggregate_pressure, daily_aggregate_pressure_index)),
-    (DAYLYPRECIP, (daily_aggregate_precip, daily_aggregate_precip_index)),
-    (MONTHLYTEMP, (monthly_aggregate_temperature, monthly_aggregate_temperature_index)),
-    (MONTHLYWIND, (monthly_aggregate_windspeed, monthly_aggregate_windspeed_index)),
-    (MONTHLYPRESS, (monthly_aggregate_pressure, monthly_aggregate_pressure_index)),
-    (MONTHLYPRECIP, (monthly_aggregate_precip, monthly_aggregate_precip_index)),
-    (PREDICTTEMP, (daily_predicted_temperature, daily_predicted_temperature_index))
+    (eventStoreTables.rawWeather, (raw_weather_data, raw_weather_data_index)),
+    (eventStoreTables.skyConditionsLookup, (sky_condition_lookup, emptyIndex)),
+    (eventStoreTables.daylyTemperature, (daily_aggregate_temperature, daily_aggregate_temperature_index)),
+    (eventStoreTables.daylyWind, (daily_aggregate_windspeed, daily_aggregate_windspeed_index)),
+    (eventStoreTables.dailyPressure, (daily_aggregate_pressure, daily_aggregate_pressure_index)),
+    (eventStoreTables.dailyPrecipitation, (daily_aggregate_precip, daily_aggregate_precip_index)),
+    (eventStoreTables.monthlyTemperature, (monthly_aggregate_temperature, monthly_aggregate_temperature_index)),
+    (eventStoreTables.monthlyWind, (monthly_aggregate_windspeed, monthly_aggregate_windspeed_index)),
+    (eventStoreTables.monthlyPressure, (monthly_aggregate_pressure, monthly_aggregate_pressure_index)),
+    (eventStoreTables.monthlyPrecipitation, (monthly_aggregate_precip, monthly_aggregate_precip_index)),
+    (eventStoreTables.predictedTemperature, (daily_predicted_temperature, daily_predicted_temperature_index))
   )
 
   def createContext(connectionEndpoints: String, user: String, password: String): Option[EventContext] = {
@@ -211,11 +214,11 @@ object EventStoreSupport {
     ConfigurationReader.setEventUser(user)
     ConfigurationReader.setEventPassword(password)
     try {
-      Some(EventContext.createDatabase(DBNAME))
+      Some(EventContext.createDatabase(eventStoreConfig.database))
     } catch {
       case e: Throwable => {
         try {
-          EventContext.openDatabase(DBNAME)
+          EventContext.openDatabase(eventStoreConfig.database)
           Some(EventContext.getEventContext)
         }catch {
           case e: Throwable => None
@@ -229,7 +232,7 @@ object EventStoreSupport {
     var tables : List[String] = List()
     var success = false
     var attempts = 0
-    while (!success || (attempts > RETRIES)) {
+    while (!success || (attempts > eventStoreConfig.retries)) {
       try {
         attempts = attempts + 1
         tables = ctx.getNamesOfTables.toList

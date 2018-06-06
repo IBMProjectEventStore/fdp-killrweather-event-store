@@ -15,79 +15,153 @@
  */
 package com.lightbend.killrweather.settings
 
-final object WeatherSettings{
+import java.util.concurrent.TimeUnit
 
-  val AppName: String = "KillrWeatherEventStore"
+import com.typesafe.config.{Config, ConfigFactory}
+import net.ceedubs.ficus.Ficus._
+import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 
-  val SparkCleanerTtl = (3600 * 2)
+import scala.concurrent.duration.FiniteDuration
 
-  val SparkStreamingBatchInterval = 5000L
+/**
+  * Application settings. First attempts to acquire from the deploy environment.
+  * If not exists, then from -D java system properties, else a default config.
+  *
+  * Settings in the environment such as: SPARK_HA_MASTER=local[10] is picked up first.
+  *
+  * Settings from the command line in -D will override settings in the deploy environment.
+  * For example: sbt -Dspark.master="local[12]" run
+  *
+  * If you have not yet used Typesafe Config before, you can pass in overrides like so:
+  *
+  * {{{
+  *   new Settings(ConfigFactory.parseString("""
+  *      spark.master = "some.ip"
+  *   """))
+  * }}}
+  *
+  * Any of these can also be overridden by your own application.conf.
+  *
+  */
 
-  val SparkCheckpointDir = "./checkpoints/"
 
-  val localKafkaBrokers = sys.env.get("kafka.brokers.local") match {
-    case Some(kb) => kb match {
-      case "false" => false
-      case _ => true
+case class KafkaConfig(brokers: String, topic: String, group: String)
+case class StreamingConfig(batchInterval: FiniteDuration, checkpointDir: String="./checkpoints")
+case class EventStoreConfig(endpoint: String="localhost:1100", user: String="admin", password : String="password", database: String="KillrWeather", retries: Int=5)
+
+case class EventStoreTables(
+  rawWeather: String = "raw_weather_data",
+  skyConditionsLookup: String = "sky_condition_lookup",
+
+  daylyTemperature: String = "daily_aggregate_temperature",
+  daylyWind: String = "daily_aggregate_windspeed",
+  dailyPressure: String = "daily_aggregate_pressure",
+  dailyPrecipitation: String = "daily_aggregate_precip",
+
+  predictedTemperature: String = "daily_predicted_temperature",
+
+  monthlyTemperature: String = "monthly_aggregate_temperature",
+  monthlyWind: String = "monthly_aggregate_windspeed",
+  monthlyPressure: String = "monthly_aggregate_pressure",
+  monthlyPrecipitation: String = "monthly_aggregate_precip"
+)
+
+case class ModelListenerConfig(port : Int = 5000)
+
+case class LoaderConfig(publish_interval : String, data_dir : String, batch_size : Int)
+
+case class KillrWeatherAppConfig(appName: String = "KillrWeatherEventStore", local: Boolean = true)
+
+
+class WeatherSettings(val config: Config) extends Serializable {
+
+  val eventStoreConfig: EventStoreConfig =
+    try{
+      config.as[EventStoreConfig]("eventstore")
     }
-    case None => true // local
+    catch{
+      case _:Throwable => EventStoreConfig()
+    }
+
+  val kafkaRawConfig: KafkaConfig =
+    try {
+      config.as[KafkaConfig]("kafkaRaw")
+    }
+    catch{
+      case _:Throwable => KafkaConfig("broker.kafka.l4lb.thisdcos.directory:9092", "killrweather.raw", "killrweather.rawgroup")
+    }
+
+  val kafkaDaylyConfig: KafkaConfig =
+    try {
+      config.as[KafkaConfig]("kafkaDayly")
+    }
+    catch{
+      case _:Throwable => KafkaConfig("broker.kafka.l4lb.thisdcos.directory:9092", "killrweather.dayly", "killrweather.daylygroup")
+    }
+  val kafkaModelConfig: KafkaConfig =
+    try {
+      config.as[KafkaConfig]("kafkaModel")
+    }
+    catch{
+      case _:Throwable => KafkaConfig("broker.kafka.l4lb.thisdcos.directory:9092", "killrweather.model", "killrweather.modelgroup")
+    }
+
+  val eventStoreTables: EventStoreTables =
+    try {
+      config.as[EventStoreTables]("tables")
+    }
+    catch{
+      case _:Throwable => EventStoreTables()
+    }
+
+  val streamingConfig: StreamingConfig =
+    try {
+      config.as[StreamingConfig]("streamingConfig")
+    }
+    catch{
+      case _:Throwable => StreamingConfig(new FiniteDuration(5, TimeUnit.SECONDS),"/chkp")
+    }
+
+  val killrWeatherAppConfig : KillrWeatherAppConfig =
+    try {
+      config.as[KillrWeatherAppConfig]("killrweatherApp")
+    }
+    catch{
+      case _:Throwable => KillrWeatherAppConfig()
+    }
+
+  val modelListenerConfig : ModelListenerConfig =
+    try{
+      config.as[ModelListenerConfig]("modelListener")
+    }
+    catch{
+      case _:Throwable => ModelListenerConfig()
+    }
+
+  val loaderConfig =
+    try {
+      config.as[LoaderConfig]("loader")
+    }
+    catch{
+      case _:Throwable => LoaderConfig("1 second", "data/load/", 10)
+    }
+
+  override def equals(obj: scala.Any): Boolean = {
+    obj match {
+      case w: WeatherSettings =>
+        w.config == this.config
+      case _:Throwable => false
+    }
   }
-  println(s"Using Local Kafka Brokers: $localKafkaBrokers")
 
-  val kafkaBrokers = sys.env.get("kafka.brokers") match {
-    case Some(kb) => kb
-    case None => "localhost:9092" // local
+  override def hashCode(): Int = config.hashCode()
+}
+
+object WeatherSettings {
+
+  val baseConfig = ConfigFactory.load()
+
+  def apply(): WeatherSettings = {
+    new WeatherSettings(baseConfig)
   }
-  println(s"Using Kafka Brokers: $kafkaBrokers")
-
-  val KafkaGroupId = "killrweather.group"
-  val KafkaModelGroupId = "killrweather.model"
-  val KafkaModelDataGroupId = "killrweather.dayly"
-  val KafkaTopicRaw = "killrweather.raw"
-  val KafkaTopicDaily = "killrweather.dayly"
-  val KafkaTopicModel = "killrweather.model"
-
-  // Event Store
-  val eventStore = sys.env.get("eventstore.endpoint") match {
-    case Some(kb) => kb
-    case None => "localhost:1100" // local
-  }
-  println(s"Using EventStore: $eventStore")
-
-  // Credentials
-  val user = sys.env.get("eventstore.user") match {
-    case Some(u) => u
-    case None => "admin" // local
-  }
-  println(s"Using EventStore user: $user")
-  val password = sys.env.get("eventstore.password") match {
-    case Some(p) => p
-    case None => "password" // local
-  }
-  
-  // Event Store
-  val modelListenerPort = sys.env.get("modellistener.port") match {
-    case Some(kb) => kb.toInt
-    case None => 5000 // default
-  }
-  println(s"Using EventStore: $eventStore")
-  
-  val DBNAME = "KillrWeather"
-
-  val RAWWEATHER = "raw_weather_data"
-  val SKYCONDITIONSLOOKUP = "sky_condition_lookup"
-
-  val DAYLYTEMP = "daily_aggregate_temperature"
-  val DAYLYWIND = "daily_aggregate_windspeed"
-  val DAYLYPRESS = "daily_aggregate_pressure"
-  val DAYLYPRECIP = "daily_aggregate_precip"
-
-  val PREDICTTEMP = "daily_predicted_temperature"
-
-  val MONTHLYTEMP = "monthly_aggregate_temperature"
-  val MONTHLYWIND = "monthly_aggregate_windspeed"
-  val MONTHLYPRESS = "monthly_aggregate_pressure"
-  val MONTHLYPRECIP = "monthly_aggregate_precip"
-
-  val RETRIES = 5
 }

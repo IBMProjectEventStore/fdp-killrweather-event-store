@@ -11,7 +11,7 @@ import org.apache.kafka.common.serialization.ByteArraySerializer
 import akka.kafka.scaladsl.Producer
 import com.google.protobuf.ByteString
 import com.lightbend.killrweather.modellistener.resources.ModelSubmissionData
-import com.lightbend.killrweather.settings.WeatherSettings._
+import com.lightbend.killrweather.settings.WeatherSettings
 import com.lightbend.model.modeldescriptor.ModelDescriptor
 import com.lightbend.model.modeldescriptor.ModelDescriptor.ModelType
 
@@ -24,18 +24,20 @@ import scala.concurrent.{ExecutionContext, Future}
  */
 class RequestService(implicit executionContext: ExecutionContext, materializer: ActorMaterializer, system: ActorSystem) {
 
+  val settings = WeatherSettings()
+  import settings._
   import RequestService._
 
-  println(s"Running HTTP Client. Kafka: $kafkaBrokers")
+  println(s"Running HTTP Client. Kafka: ${kafkaModelConfig.brokers}")
 
   val producerSettings = ProducerSettings(system, new ByteArraySerializer, new ByteArraySerializer)
-    .withBootstrapServers(kafkaBrokers)
+    .withBootstrapServers(kafkaModelConfig.brokers)
 
   def processRequest(model: ModelSubmissionData): Future[Unit] = Future {
     //    Source.single(report).runWith(Sink.foreach(println))
     println(s"Model Listener new request for wsid ${model.wsid} with PMML ${model.pmml}")
     val _ = Source.single(model).map { m =>
-      new ProducerRecord[Array[Byte], Array[Byte]](KafkaTopicModel, convertModel(m))
+      new ProducerRecord[Array[Byte], Array[Byte]](kafkaModelConfig.topic, convertModel(m))
     }.runWith(Producer.plainSink(producerSettings))
   }
 }

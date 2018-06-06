@@ -16,23 +16,27 @@
 
 object Versions {
 
-  val Akka              = "2.5.6"
-  val AkkaStreams       = "2.5.6"
-  val AkkaStreamsKafka  = "0.18"
-  val AkkaHTTP          = "10.0.10"
-  val akkaHttpJsonVersion = "1.18.1"
+  val Akka              = "2.5.11"
+  val AkkaStreams       = "2.5.11"
+  val AkkaStreamsKafka  = "0.19"
+  val AkkaHTTP          = "10.1.0"
+  val akkaHttpJsonVersion = "1.20.0"
 
   val Curator           = "4.0.0"
   val JDK               = "1.8"
-  val JodaConvert       = "1.8.2"
+  val JodaConvert       = "2.0"
   val JodaTime          = "2.9.9"
-  val Json4s            = "3.5.0"
+  val Json4s            = "3.5.3"
   val Kafka             = "1.0.0"
   val Logback           = "1.2.3"
-  val Scala             = "2.11.8"
-  val Slf4j             = "1.7.16"
+  val Scala             = "2.11.11"
+  val Slf4j             = "1.7.25"
+
+  val TypesafeConfigVersion = "1.3.2"
+  val FicusVersion      = "1.4.3"
+
   val Spark             = "2.1.0" //"2.2.0"
-  val ScalaPBJSONVersion= "0.3.1"
+  val ScalaPBJSONVersion= "0.3.3"
 
   val PMMLVersion = "1.3.10"
 }

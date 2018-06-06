@@ -17,8 +17,7 @@ object Dependencies {
   val akkaHttpCore      = "com.typesafe.akka"       % "akka-http_2.11"                  % AkkaHTTP
   val akkaActor         = "com.typesafe.akka"       % "akka-actor_2.11"                 % Akka
   val akkaSlf4j         = "com.typesafe.akka"       % "akka-slf4j_2.11"                 % Akka
-  val akkaHttpJsonJackson = "de.heikoseeberger"         %% "akka-http-jackson"        % akkaHttpJsonVersion
-
+  val akkaHttpJsonJackson = "de.heikoseeberger"     %% "akka-http-jackson"              % akkaHttpJsonVersion
 
   val curator           = "org.apache.curator"      % "curator-test"                    % Curator                           // ApacheV2
   val jodaTime          = "joda-time"               % "joda-time"                       % JodaTime                          // ApacheV2
@@ -48,6 +47,8 @@ object Dependencies {
   val jpmml         = "org.jpmml"                    % "pmml-evaluator"                % PMMLVersion
   val jpmmlextras   = "org.jpmml"                    % "pmml-evaluator-extension"      % PMMLVersion
 
+  val typesafeConfig    = "com.typesafe"            %  "config"                         % TypesafeConfigVersion
+  val ficus             = "com.iheart"              %% "ficus"                          % FicusVersion
 
   val logging = Seq(logback.exclude("org.slf4j", "slf4j-api"), slf4jApi)
 
@@ -77,7 +78,9 @@ object Dependencies {
       exclude("io.netty", "netty"),
     kafka.
       exclude("org.slf4j", "slf4j-log4j12").
-      exclude("io.netty", "netty"))
+      exclude("io.netty", "netty"),
+    typesafeConfig, ficus
+  )
   val app = spark
   val clientHTTP = logging ++ akka ++ json
   val model = akka ++ Seq(jpmml, jpmmlextras)

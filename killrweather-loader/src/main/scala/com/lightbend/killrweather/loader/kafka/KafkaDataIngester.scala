@@ -1,41 +1,41 @@
 package com.lightbend.killrweather.loader.kafka
 
-import com.lightbend.killrweather.loader.utils.{ DataConvertor, FilesIterator }
+import java.io.File
+
+import com.lightbend.killrweather.loader.utils.{DataConvertor, FilesIterator}
 import com.lightbend.killrweather.kafka.MessageSender
 import com.lightbend.killrweather.settings.WeatherSettings
 import org.apache.kafka.common.serialization.ByteArraySerializer
 
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.duration.Duration
 
 /**
   * Created by boris on 7/7/17.
   */
 object KafkaDataIngester {
-  val file = "data/load/"
-  val timeInterval: Long = 1000 * 1 // 1 sec
-  val batchInterval: Long = 1000 * 600 // 10 min
-  val batchSize = 100
 
   def main(args: Array[String]) {
 
-    import WeatherSettings._
+    val settings = WeatherSettings()
+    import settings._
 
-    val ingester = KafkaDataIngester(kafkaBrokers)
-    ingester.execute(file, KafkaTopicRaw)
+    val brokers = kafkaRawConfig.brokers
+    val dataDir = loaderConfig.data_dir
+    val timeInterval = Duration(loaderConfig.publish_interval)
+    val batchSize = loaderConfig.batch_size
+    println(s"Starting data ingester \n Brokers : $brokers, topic : ${kafkaRawConfig.topic}, directory : $dataDir, timeinterval $timeInterval, batch size $batchSize")
+
+    val ingester = KafkaDataIngester(brokers, batchSize, timeInterval)
+    ingester.execute(dataDir, kafkaRawConfig.topic)
   }
 
-  def pause(time : Long): Unit = {
-    try {
-      Thread.sleep(time)
-    } catch {
-      case _: Throwable => // Ignore
-    }
-  }
+  def pause(timeInterval : Duration): Unit = Thread.sleep(timeInterval.toMillis)
 
-  def apply(brokers: String): KafkaDataIngester = new KafkaDataIngester(brokers)
+  def apply(brokers: String, batchSize: Int, timeInterval : Duration): KafkaDataIngester = new KafkaDataIngester(brokers, batchSize, timeInterval)
 }
 
-class KafkaDataIngester(brokers: String) {
+class KafkaDataIngester(brokers: String, batchSize: Int, timeInterval : Duration) {
 
   import KafkaDataIngester._
 
@@ -46,7 +46,7 @@ class KafkaDataIngester(brokers: String) {
     while (true) {
       val iterator = FilesIterator(new java.io.File(file), "UTF-8")
       val batch = new ListBuffer[Array[Byte]]()
-      var numrec = 0;
+      var numrec = 0
       iterator.foreach(record => {
         numrec += 1
         batch += DataConvertor.convertToGPB(record)
@@ -71,7 +71,6 @@ class KafkaDataIngester(brokers: String) {
       if (batch.size > 0)
         sender.batchWriteValue(topic, batch)
       println(s"Submitted $numrec records")
-      pause(batchInterval)
     }
   }
 }

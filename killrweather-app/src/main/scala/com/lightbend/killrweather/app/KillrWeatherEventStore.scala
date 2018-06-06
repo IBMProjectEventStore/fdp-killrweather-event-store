@@ -17,7 +17,6 @@ import org.apache.spark.streaming.kafka010.KafkaUtils
 import org.apache.spark.streaming.kafka010.LocationStrategies.PreferConsistent
 import org.apache.spark.streaming.{Seconds, State, StateSpec, StreamingContext}
 import org.apache.spark.util.StatCounter
-//import org.apache.log4j.{Level, LogManager}
 
 import scala.collection.mutable.ListBuffer
 
@@ -29,43 +28,44 @@ object KillrWeatherEventStore {
   def main(args: Array[String]): Unit = {
 
     // Create context
-    import WeatherSettings._
+    val settings = WeatherSettings()
+    import settings._
 
     // Enable Logging for the Event Store
     //LogManager.getLogger("com.ibm.event").setLevel(Level.DEBUG)
     //LogManager.getLogger("org.apache.spark.sql.ibm.event").setLevel(Level.DEBUG)
 
     // Initialize Event Store
-    val ctx = EventStoreSupport.createContext(eventStore, user, password)
+    val ctx = EventStoreSupport.createContext(eventStoreConfig.endpoint, eventStoreConfig.user, eventStoreConfig.password)
     ctx.foreach(EventStoreSupport.ensureTables(_))
     println(s"Event Store initialised")
 
     // Create embedded Kafka and topic
-    if(localKafkaBrokers) {
+    if(killrWeatherAppConfig.local) {
       val kafka = KafkaLocalServer(true)
       kafka.start()
-      kafka.createTopic(KafkaTopicRaw)
-      kafka.createTopic(KafkaTopicDaily)
-      kafka.createTopic(KafkaTopicModel)
+      kafka.createTopic(kafkaRawConfig.topic)
+      kafka.createTopic(kafkaDaylyConfig.topic)
+      kafka.createTopic(kafkaModelConfig.topic)
       println(s"Kafka Cluster created")
     }
 
     val spark = SparkSession
       .builder()
-      .appName(AppName)
+      .appName(killrWeatherAppConfig.appName)
       .master("local[*]")
       .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
       .getOrCreate()
 
-    val ssc = new StreamingContext(spark.sparkContext, Seconds(SparkStreamingBatchInterval / 1000))
-    ssc.checkpoint(SparkCheckpointDir)
+    val ssc = new StreamingContext(spark.sparkContext, Seconds(streamingConfig.batchInterval.toSeconds))
+    ssc.checkpoint(streamingConfig.checkpointDir)
 
     // Create raw data observations stream
     val kafkaParams = MessageListener.consumerProperties(
-      kafkaBrokers,
-      KafkaGroupId, classOf[ByteArrayDeserializer].getName, classOf[ByteArrayDeserializer].getName
+      kafkaRawConfig.brokers,
+      kafkaRawConfig.group, classOf[ByteArrayDeserializer].getName, classOf[ByteArrayDeserializer].getName
     )
-    val topics = List(KafkaTopicRaw)
+    val topics = List(kafkaRawConfig.topic)
 
     // Initial state RDD for daily accumulator
     val dailyRDD = ssc.sparkContext.emptyRDD[(Long, ListBuffer[WeatherRecord])]
@@ -75,8 +75,8 @@ object KillrWeatherEventStore {
 
     // Create broadcast variable for the sink definition
 
-    val eventStoreSink = spark.sparkContext.broadcast(EventStoreSink(eventStore, user, password))
-    val kafkaSinkProps = MessageProducer.producerProperties(kafkaBrokers,
+    val eventStoreSink = spark.sparkContext.broadcast(EventStoreSink(eventStoreConfig.endpoint, eventStoreConfig.user, eventStoreConfig.password))
+    val kafkaSinkProps = MessageProducer.producerProperties(kafkaRawConfig.brokers,
       classOf[ByteArraySerializer].getName, classOf[ByteArraySerializer].getName)
     val kafkaSink = spark.sparkContext.broadcast(KafkaSink(kafkaSinkProps))
 
@@ -130,7 +130,7 @@ object KillrWeatherEventStore {
     dailyStream.print()
 
     //  Write dayly temperature to Kafka
-    dailyStream.map(ds => KafkaDataConvertor.toGPB(ds._2)).foreachRDD(_.foreach(kafkaSink.value.send(KafkaTopicDaily, _)))
+    dailyStream.map(ds => KafkaDataConvertor.toGPB(ds._2)).foreachRDD(_.foreach(kafkaSink.value.send(kafkaDaylyConfig.topic, _)))
 
     // Save daily temperature
     dailyStream.map(ds => DailyTemperature(ds._2))

@@ -20,7 +20,7 @@ import com.lightbend.killrweather.EventStore.EventStoreSupport
 import com.lightbend.killrweather.daily.model.{DataRecord, ModelToServe, ServingResult}
 import com.lightbend.killrweather.daily.server.actors.ModelServingManager
 import com.lightbend.killrweather.daily.server.queryablestate.QueriesAkkaHttpResource
-import com.lightbend.killrweather.settings.WeatherSettings._
+import com.lightbend.killrweather.settings.WeatherSettings
 import com.lightbend.scala.modelServer.model.ModelWithDescriptor
 import org.apache.spark.sql.Row
 
@@ -42,16 +42,20 @@ object AkkaModelServer {
   var ctx : Option[EventContext] = None
   var table : ResolvedTableSchema = null
 
-  println(s"Using kafka brokers at ${kafkaBrokers} ")
+  val settings = WeatherSettings()
+  import settings._
+
+
+  println(s"Using kafka brokers at ${kafkaModelConfig.brokers} ")
 
   val dataConsumerSettings = ConsumerSettings(system, new ByteArrayDeserializer, new ByteArrayDeserializer)
-    .withBootstrapServers(kafkaBrokers)
-    .withGroupId(KafkaModelDataGroupId)
+    .withBootstrapServers(kafkaDaylyConfig.brokers)
+    .withGroupId(kafkaDaylyConfig.group)
     .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
 
   val modelConsumerSettings = ConsumerSettings(system, new ByteArrayDeserializer, new ByteArrayDeserializer)
-    .withBootstrapServers(kafkaBrokers)
-    .withGroupId(KafkaModelGroupId)
+    .withBootstrapServers(kafkaModelConfig.brokers)
+    .withGroupId(kafkaModelConfig.group)
     .withProperty(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "latest")
 
   def main(args: Array[String]): Unit = {
@@ -59,14 +63,14 @@ object AkkaModelServer {
     val modelserver = system.actorOf(ModelServingManager.props)
 
     // Model stream processing
-    Consumer.atMostOnceSource(modelConsumerSettings, Subscriptions.topics(KafkaTopicModel))
+    Consumer.atMostOnceSource(modelConsumerSettings, Subscriptions.topics(kafkaModelConfig.topic))
       .map(record => ModelToServe.fromByteArray(record.value)).collect { case Success(a) => a }
       .map(record => ModelWithDescriptor.fromModelToServe(record)).collect { case Success(a) => a }
       .mapAsync(1)(elem => modelserver ? elem)
       .runWith(Sink.ignore) // run the stream, we do not read the results directly
 
     // Data stream processing
-    Consumer.atMostOnceSource(dataConsumerSettings, Subscriptions.topics(KafkaTopicDaily))
+    Consumer.atMostOnceSource(dataConsumerSettings, Subscriptions.topics(kafkaDaylyConfig.topic))
       .map(record => DataRecord.fromByteArray(record.value())).collect { case Success(a) => a }
       .map{record => println(s"Processing record $record") ; record}
       .mapAsync(1)(elem => (modelserver ? elem).mapTo[ServingResult])
@@ -88,15 +92,15 @@ object AkkaModelServer {
 
   def writeToES(result : ServingResult) : Unit = {
     if(!ctx.isDefined) {
-      ctx = EventStoreSupport.createContext(eventStore, user, password)
-      table = ctx.get.getTable(PREDICTTEMP)
+      ctx = EventStoreSupport.createContext(eventStoreConfig.endpoint, eventStoreConfig.user, eventStoreConfig.password)
+      table = ctx.get.getTable(eventStoreTables.predictedTemperature)
     }
     val start = System.currentTimeMillis()
     val date = TempDate(result.ts)
     val row = Row(result.wsid, date.year, date.month, date.day, date.ts, result.result)
     try {
       val future = ctx.get.insertAsync(table, row)
-      val insertResult = Await.result(future, Duration.apply(1, SECONDS))
+      val insertResult = Await.result(future, Duration.apply(5, SECONDS))
       if (insertResult.failed) {
         println(s"batch insert failed: $insertResult")
       }

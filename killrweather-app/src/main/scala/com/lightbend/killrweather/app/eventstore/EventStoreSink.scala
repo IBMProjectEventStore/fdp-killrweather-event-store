@@ -2,7 +2,7 @@ package com.lightbend.killrweather.app.eventstore
 
 import com.ibm.event.oltp.{EventContext, InsertResult}
 import com.lightbend.killrweather.EventStore.EventStoreSupport
-import com.lightbend.killrweather.settings.WeatherSettings._
+import com.lightbend.killrweather.settings.WeatherSettings
 import org.apache.spark.sql.Row
 
 import scala.concurrent.duration._
@@ -24,49 +24,53 @@ object EventStoreSink {
 
 class EventStoreSink(createContext: () => Option[EventContext]) extends Serializable {
 
+  // Create context
+  val settings = WeatherSettings()
+  import settings._
+
   var ctx = createContext()
 
   def writeRaw(raw: Iterator[Row]): Unit = {
-    writeBatch(RAWWEATHER, raw)
+    writeBatch(eventStoreTables.rawWeather, raw)
   }
 
   def writeDailyTemperature(raw: Iterator[Row]): Unit = {
-    writeBatch(DAYLYTEMP, raw)
+    writeBatch(eventStoreTables.daylyTemperature, raw)
   }
 
   def writeDailyWind(raw: Iterator[Row]): Unit = {
-    writeBatch(DAYLYWIND, raw)
+    writeBatch(eventStoreTables.daylyWind, raw)
   }
 
   def writeDailyPressure(raw: Iterator[Row]): Unit = {
-    writeBatch(DAYLYPRESS, raw)
+    writeBatch(eventStoreTables.dailyPressure, raw)
   }
 
   def writeDailyPresip(raw: Iterator[Row]): Unit = {
-    writeBatch(DAYLYPRECIP, raw)
+    writeBatch(eventStoreTables.dailyPrecipitation, raw)
   }
 
   def writeMothlyTemperature(raw: Iterator[Row]): Unit = {
-    writeBatch(MONTHLYTEMP, raw)
+    writeBatch(eventStoreTables.monthlyTemperature, raw)
   }
 
   def writeMothlyWind(raw: Iterator[Row]): Unit = {
-    writeBatch(MONTHLYWIND, raw)
+    writeBatch(eventStoreTables.monthlyWind, raw)
   }
 
   def writeMothlyPressure(raw: Iterator[Row]): Unit = {
-    writeBatch(MONTHLYPRESS, raw)
+    writeBatch(eventStoreTables.monthlyPressure, raw)
   }
 
   def writeMothlyPresip(raw: Iterator[Row]): Unit = {
-    writeBatch(MONTHLYPRECIP, raw)
+    writeBatch(eventStoreTables.monthlyPrecipitation, raw)
   }
 
   private def writeBatch(tableName : String, data: Iterator[Row]) : Unit = {
     // Ensure that  that we are connected
     if (!ctx.isDefined) {
       println(s"Recreating the Event Store Context!!!")
-      ctx = EventStoreSupport.createContext(eventStore, user, password)
+      ctx = EventStoreSupport.createContext(eventStoreConfig.endpoint, eventStoreConfig.user, eventStoreConfig.password)
       EventStoreSupport.ensureTables(ctx.get)
     }
 
