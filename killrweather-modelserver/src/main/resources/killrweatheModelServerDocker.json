@@ -1,0 +1,13 @@
+{
+  "id": "/killrweathermodelserver",
+  "container": {
+    "docker": {
+      "image": "lightbend/modelserver:1.2.0",
+      "forcePull": true,
+    }
+  },
+  "instances": 1,
+  "cpus": 2,
+  "mem": 4096
+
+}

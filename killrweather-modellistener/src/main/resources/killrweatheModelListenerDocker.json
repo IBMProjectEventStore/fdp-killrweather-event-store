@@ -1,0 +1,13 @@
+{
+  "id": "/killrweathermodellistener",
+  "container": {
+    "docker": {
+      "image": "lightbend/modelListener:1.2.0",
+      "forcePull": true,
+    }
+  },
+  "instances": 1,
+  "cpus": 2,
+  "mem": 4096
+
+}

@@ -84,7 +84,7 @@ lazy val killrWeatherCore = (project in file("./killrweather-core"))
 
 
 // Spark streaming project
-lazy val killrWeatherApp = sbtdockerSparkAppBase("killrWeatherApp")("./killrweather-app")
+lazy val killrWeatherApp = sbtdockerSparkAppBase("killrWeatherAppES")("./killrweather-app")
   .settings(libraryDependencies ++= app)
   .settings (mainClass in Compile := Some("com.lightbend.killrweather.app.KillrWeatherEventStore"))
   .settings(dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-core"  % "2.6.7",
