@@ -2,7 +2,7 @@
   "id": "/killrweathermodellistener",
   "container": {
     "docker": {
-      "image": "lightbend/modelListener:1.2.0",
+      "image": "lightbend/modelListener:VERSION_FDP",
       "forcePull": true,
     }
   },
