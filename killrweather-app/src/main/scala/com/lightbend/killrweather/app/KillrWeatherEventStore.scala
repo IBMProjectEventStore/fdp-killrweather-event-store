@@ -36,6 +36,7 @@ object KillrWeatherEventStore {
     //LogManager.getLogger("org.apache.spark.sql.ibm.event").setLevel(Level.DEBUG)
 
     // Initialize Event Store
+
     val ctx = EventStoreSupport.createContext(eventStoreConfig.endpoint, eventStoreConfig.user, eventStoreConfig.password)
     ctx.foreach(EventStoreSupport.ensureTables(_))
     println(s"Event Store initialised")
@@ -74,7 +75,6 @@ object KillrWeatherEventStore {
     val monthlyRDD = ssc.sparkContext.emptyRDD[(Long, ListBuffer[DailyWeatherDataProcess])]
 
     // Create broadcast variable for the sink definition
-
     val eventStoreSink = spark.sparkContext.broadcast(EventStoreSink(eventStoreConfig.endpoint, eventStoreConfig.user, eventStoreConfig.password))
     val kafkaSinkProps = MessageProducer.producerProperties(kafkaRawConfig.brokers,
       classOf[ByteArraySerializer].getName, classOf[ByteArraySerializer].getName)

@@ -121,7 +121,7 @@ lazy val loader = sbtdockerScalaAppBase("loader")("./killrweather-loader")
   .dependsOn(killrWeatherCore, protobufs)
 
 // Model Server - Real time model scoring - pure scala
-lazy val modelserver = sbtdockerScalaAppBase("modelserver")("./killrweather-modelserver")
+lazy val modelserver = sbtdockerScalaAppBase("modelserverES")("./killrweather-modelserver")
   .settings(
     mainClass in Compile := Some("com.lightbend.killrweather.daily.server.modelserver.AkkaModelServer"),
     libraryDependencies ++= model ++ spark.map(_.withConfigurations(configurations = Option("compile"))),
@@ -133,7 +133,7 @@ lazy val modelserver = sbtdockerScalaAppBase("modelserver")("./killrweather-mode
   .dependsOn(killrWeatherCore, protobufs)
 
 // Model Listener - Listen to model updates and write them to Kafka - pure scala
-lazy val modelListener = sbtdockerScalaAppBase("modelListener")("./killrweather-modellistener")
+lazy val modelListener = sbtdockerScalaAppBase("modelListenerES")("./killrweather-modellistener")
   .settings(
     mainClass in Compile := Some("com.lightbend.killrweather.modellistener.TemperaturePredictionModel"),
     libraryDependencies ++= clientHTTP,

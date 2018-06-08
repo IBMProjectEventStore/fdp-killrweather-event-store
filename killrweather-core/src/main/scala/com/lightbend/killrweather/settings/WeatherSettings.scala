@@ -119,7 +119,7 @@ class WeatherSettings(val config: Config) extends Serializable {
       config.as[StreamingConfig]("streamingConfig")
     }
     catch{
-      case _:Throwable => StreamingConfig(new FiniteDuration(5, TimeUnit.SECONDS),"/chkp")
+      case _:Throwable => StreamingConfig(new FiniteDuration(5, TimeUnit.SECONDS),"./chkp")
     }
 
   val killrWeatherAppConfig : KillrWeatherAppConfig =
