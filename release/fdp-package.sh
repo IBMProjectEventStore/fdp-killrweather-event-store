@@ -79,7 +79,6 @@ done
 # Remove files and directories that shouldn't be in the distribution.
 # Some of these should have been filtered in the previous do loop.
 cd "$staging"
-rm -f "$OUTPUT_FILE_ROOT/README-DEVELOPERS.md"
 find $OUTPUT_FILE_ROOT \( -name whitesource.sbt -o -name WhitesourceLicensePlugin.scala \) -exec rm {} \;
 find $OUTPUT_FILE_ROOT -type d | egrep 'project/(project|target)$' | while read d; do rm -rf "$d"; done
 find $OUTPUT_FILE_ROOT -type d | egrep 'target$' | while read d; do rm -rf "$d"; done
