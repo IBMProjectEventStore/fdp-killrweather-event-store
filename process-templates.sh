@@ -23,8 +23,6 @@ function process_templates {
   done
 }
 
-# Find the template files and change the version, generating the corresponding file.
-process_templates *.template
 # Ignore templates that end up in target directories:
 find killr* -path '*/target' -prune -o -name '*.template' | while read f
 do

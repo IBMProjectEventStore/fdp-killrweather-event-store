@@ -4,12 +4,13 @@ set -e
 SCRIPT=`basename ${BASH_SOURCE[0]}`
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd -P )"
 ROOT_DIR="${DIR}/.."
+PROJECT=fdp-killrweather-event-store
 
 . $ROOT_DIR/version.sh
 
 function usage {
   cat<< EOF
-  fdp-killrweather-event-store:
+  $PROJECT:
   This script currently builds the software, including docker images (but doesn't push them).
   It also creates an archive of the code.
   Usage: $SCRIPT [VERSION] [-h | --help]
@@ -49,7 +50,7 @@ echo "$0: Processing templates for config files:"
 
 $ROOT_DIR/process-templates.sh $VERSION
 
-OUTPUT_FILE_ROOT=fdp-killrweather-event-store-${VERSION}
+OUTPUT_FILE_ROOT=$PROJECT-$VERSION
 OUTPUT_FILE=${OUTPUT_FILE_ROOT}.zip
 
 echo "$0: Building the zip file of sources: $OUTPUT_FILE"
@@ -77,15 +78,16 @@ done
 
 # Remove files and directories that shouldn't be in the distribution.
 # Some of these should have been filtered in the previous do loop.
-cd $staging
-find ${OUTPUT_FILE_ROOT} \( -name whitesource.sbt -o -name WhitesourceLicensePlugin.scala \) -exec rm {} \;
-find ${OUTPUT_FILE_ROOT} -type d | egrep 'project/(project|target)$' | while read d; do rm -rf "$d"; done
-find ${OUTPUT_FILE_ROOT} -type d | egrep 'target$' | while read d; do rm -rf "$d"; done
+cd "$staging"
+rm -f "$OUTPUT_FILE_ROOT/README-DEVELOPERS.md"
+find $OUTPUT_FILE_ROOT \( -name whitesource.sbt -o -name WhitesourceLicensePlugin.scala \) -exec rm {} \;
+find $OUTPUT_FILE_ROOT -type d | egrep 'project/(project|target)$' | while read d; do rm -rf "$d"; done
+find $OUTPUT_FILE_ROOT -type d | egrep 'target$' | while read d; do rm -rf "$d"; done
 
-echo running: zip -r ${OUTPUT_FILE} ${OUTPUT_FILE_ROOT}
-zip -r ${OUTPUT_FILE} ${OUTPUT_FILE_ROOT}
+echo running: zip -r "$OUTPUT_FILE" "$OUTPUT_FILE_ROOT"
+zip -r "$OUTPUT_FILE" "$OUTPUT_FILE_ROOT"
 
-rm -rf ${OUTPUT_FILE_ROOT}
+rm -rf "$OUTPUT_FILE_ROOT"
 
 echo "$0: Building the Killrweather sample apps and docker images: $ROOT_DIR/build.sh"
 

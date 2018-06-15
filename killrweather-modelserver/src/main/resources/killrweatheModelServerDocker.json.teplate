@@ -2,7 +2,7 @@
   "id": "/killrweathermodelserver",
   "container": {
     "docker": {
-      "image": "lightbend/modelserver:VERSION_FDP",
+      "image": "lightbend/modelserver:FDP_VERSION",
       "forcePull": true,
     }
   },
