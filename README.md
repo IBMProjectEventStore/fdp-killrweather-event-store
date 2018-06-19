@@ -52,13 +52,31 @@ lightbend/modellisteneres                     1.2.0                           40
 lightbend/loader                              1.2.0                           d7c4e11a1627        Less than a second ago   577MB
 ````
 
-## Deploying appliccation to FDP
+## Deploying The applications to FDP
 
-The following templates for deploying application to DC/OS are provided.
-* [KillrWeather App](https://github.com/lightbend/fdp-killrweather-event-store/blob/develop/killrweather-app/src/main/resources/killrweatherAppDocker.json.template)
-* [Data Loader](https://github.com/lightbend/fdp-killrweather-event-store/blob/develop/killrweather-loader/src/main/resources/killrweatherloaderDocker.json.template)
-* [Model Listener](https://github.com/lightbend/fdp-killrweather-event-store/blob/develop/killrweather-modellistener/src/main/resources/killrweatheModelListenerDocker.json.template)
-* [Model Server](https://github.com/lightbend/fdp-killrweather-event-store/blob/develop/killrweather-modelserver/src/main/resources/killrweatheModelServerDocker.json.teplate)
+The following templates for deploying application to DC/OS are provided:
+
+* KillrWeather App: `killrweather-app/src/main/resources/killrweatherAppDocker.json.template`
+* Data Loader: `killrweather-loader/src/main/resources/killrweatherloaderDocker.json.template`
+* Model Listener: `killrweather-modellistener/src/main/resources/killrweatheModelListenerDocker.json.template`
+* Model Server: `killrweather-modelserver/src/main/resources/killrweatheModelServerDocker.json.template`
+
+If you are looking at this code as distributed with a Fast Data Platform release, you'll also have corresponding JSON files. The only difference is occurrences of the string `FDP_VERSION` has been replaced with the actual version string.
+
+If you are looking at the git repo itself, then run the following script to generate the JSON files from the templates, using an appropriate value for `VERSION`, e.g., `1.2.0`:
+
+```bash
+./process-templates.sh VERSION
+```
+
+Now you can deploy these apps to Fast Data Platform, starting with the loader:
+
+```bash
+dcos marathon app add killrweather-loader/src/main/resources/killrweatherloaderDocker.json
+dcos marathon app add killrweather-modelserver/src/main/resources/killrweatheModelServerDocker.json
+dcos marathon app add killrweather-modellistener/src/main/resources/killrweatheModelListenerDocker.json
+dcos marathon app add killrweather-app/src/main/resources/killrweatherAppDocker.json
+```
 
 ## See What's Going On...
 
