@@ -31,6 +31,10 @@ is a model updates HTTP listener based on Akka Streams, responsible for acceptin
 * [Model Server](https://github.com/lightbend/fdp-killrweather-event-store/tree/develop/killrweather-modelserver/src/main)
 is an implementation of model serving, based on Akka Streams, responsible for weather prediction based on the model, generated leveraging IBM DSX.
 
+## Prerequisites
+
+Two Fast Data Platform services are required: Kafka and HDFS. (While Spark is also used, the DC/OS Spark _service_ is not required.) Follow the instructions in the Fast Data Platform documentation for installing the platform and these two components.
+
 ## Configuring application
 
 Application is configured using [typesafe config](https://github.com/lightbend/config).
