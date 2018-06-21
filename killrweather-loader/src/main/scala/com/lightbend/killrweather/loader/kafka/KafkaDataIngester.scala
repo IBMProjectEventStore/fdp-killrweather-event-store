@@ -57,7 +57,7 @@ class KafkaDataIngester(brokers: String, batchSize: Int, timeInterval : Duration
             batch.clear()
           } catch {
             case e: Throwable =>
-              println(s"Kafka failed: ${e.printStackTrace()}")
+              println(s"Kafka write failed: ${e.printStackTrace()}")
               if (sender != null)
                 sender.close()
               sender = null
