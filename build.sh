@@ -13,5 +13,5 @@ echo $HERE
 echo "$0: Using version $VERSION"
 
 cd $HERE
-sbt "set version in ThisBuild := \"$VERSION\"" "show version" clean package docker dockerPush
+sbt "set version in ThisBuild := \"$VERSION\"" "show version" clean package dockerBuildAndPush
 
