@@ -1,6 +1,5 @@
 package com.lightbend.killrweather.loader.kafka
 
-import java.io.File
 
 import com.lightbend.killrweather.loader.utils.{DataConvertor, FilesIterator}
 import com.lightbend.killrweather.kafka.MessageSender
