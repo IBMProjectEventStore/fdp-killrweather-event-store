@@ -1,6 +1,5 @@
 package com.lightbend.killrweather.loader.kafka
 
-import java.io.File
 
 import com.lightbend.killrweather.loader.utils.{DataConvertor, FilesIterator}
 import com.lightbend.killrweather.kafka.MessageSender
@@ -58,7 +57,7 @@ class KafkaDataIngester(brokers: String, batchSize: Int, timeInterval : Duration
             batch.clear()
           } catch {
             case e: Throwable =>
-              println(s"Kafka failed: ${e.printStackTrace()}")
+              println(s"Kafka write failed: ${e.printStackTrace()}")
               if (sender != null)
                 sender.close()
               sender = null
