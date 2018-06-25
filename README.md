@@ -73,10 +73,10 @@ If you are looking at the git repo itself, then run the following script to gene
 ./process-templates.sh VERSION
 ```
 
-Now you can deploy these apps to Fast Data Platform, starting with the loader:
+Now you can deploy these apps to Fast Data Platform, starting with the loader. Note that the loader is a multi-container _pod_:
 
 ```bash
-dcos marathon app add killrweather-loader/src/main/resources/killrweatherloaderDocker.json
+dcos marathon pod add killrweather-loader/src/main/resources/killrweatherloaderDocker.json
 dcos marathon app add killrweather-modelserver/src/main/resources/killrweatheModelServerDocker.json
 dcos marathon app add killrweather-modellistener/src/main/resources/killrweatheModelListenerDocker.json
 dcos marathon app add killrweather-app/src/main/resources/killrweatherAppDocker.json
