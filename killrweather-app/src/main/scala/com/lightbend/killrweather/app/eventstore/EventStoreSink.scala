@@ -82,7 +82,7 @@ class EventStoreSink(createContext: () => Option[EventContext]) extends Serializ
         try {
           //val table = ctx.get.getTable(tableName)
           val future: Future[InsertResult] = ctx.get.batchInsertAsync(tableName, dataSeq, true)
-          val result: InsertResult = Await.result(future, Duration.apply(1, SECONDS))
+          val result: InsertResult = Await.result(future, Duration.apply(120, SECONDS))
           if (result.failed) {
             println(s"batch insert incomplete: $result")
           }

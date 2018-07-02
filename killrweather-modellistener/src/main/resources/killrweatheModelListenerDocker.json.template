@@ -2,7 +2,7 @@
   "id": "/killrweathermodellistener",
   "container": {
     "docker": {
-      "image": "lightbend/modelListener:FDP_VERSION",
+      "image": "lightbend/fdp-killrweather-event-store-model-listener:FDP_VERSION",
       "forcePull": true,
     }
   },
