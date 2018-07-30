@@ -65,9 +65,8 @@ The following templates for deploying application to DC/OS are provided:
 * Model Listener: `killrweather-modellistener/src/main/resources/killrweatheModelListenerDocker.json.template`
 * Model Server: `killrweather-modelserver/src/main/resources/killrweatheModelServerDocker.json.template`
 
-If you are looking at this code as distributed with a Fast Data Platform release, you'll also have corresponding JSON files. The only difference is occurrences of the string `FDP_VERSION` has been replaced with the actual version string.
 
-If you are looking at the git repo itself, then run the following script to generate the JSON files from the templates, using an appropriate value for `VERSION`, e.g., `1.2.0`:
+From the git repo itself, then run the following script to generate the JSON files from the templates, using an appropriate value for `VERSION`, e.g., `1.2.0`:
 
 ```bash
 ./process-templates.sh VERSION
@@ -76,11 +75,18 @@ If you are looking at the git repo itself, then run the following script to gene
 Now you can deploy these apps to Fast Data Platform, starting with the loader:
 
 ```bash
-dcos marathon app add killrweather-loader/src/main/resources/killrweatherloaderDocker.json
+dcos marathon pod add killrweather-loader/src/main/resources/killrweatherloaderDocker.json
 dcos marathon app add killrweather-modelserver/src/main/resources/killrweatheModelServerDocker.json
 dcos marathon app add killrweather-modellistener/src/main/resources/killrweatheModelListenerDocker.json
 dcos marathon app add killrweather-app/src/main/resources/killrweatherAppDocker.json
 ```
 
-## See What's Going On...
+## See What's Going On
+
+Use EventStore UI to see the data ingestion progress.
+
+
+## Monitoring and Viewing Results
+
+Monitoring is done using EventStore and Grafana.
 
