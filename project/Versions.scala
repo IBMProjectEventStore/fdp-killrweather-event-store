@@ -29,7 +29,7 @@ object Versions {
   val Json4s            = "3.5.3"
   val Kafka             = "1.0.0"
   val Logback           = "1.2.3"
-  val Scala             = "2.11.11"
+  val Scala             = "2.11.12"
   val Slf4j             = "1.7.25"
 
   val TypesafeConfigVersion = "1.3.2"
