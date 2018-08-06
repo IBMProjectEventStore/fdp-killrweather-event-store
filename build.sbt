@@ -84,7 +84,7 @@ lazy val killrWeatherCore = (project in file("./killrweather-core"))
 
 
 // Spark streaming project
-lazy val killrWeatherApp = sbtdockerSparkAppBase("killrWeatherAppES")("./killrweather-app")
+lazy val killrWeatherApp = sbtdockerSparkAppBase("fdp-killrweather-event-store-app")("./killrweather-app")
   .settings(libraryDependencies ++= app)
   .settings (mainClass in Compile := Some("com.lightbend.killrweather.app.KillrWeatherEventStore"))
   .settings(dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-core"  % "2.6.7",
@@ -112,7 +112,7 @@ lazy val appLocalRunner = (project in file("./killrweather-app-local"))
   .dependsOn(killrWeatherApp)
 
 // Loader - loading weather data to Kafka - pure scala
-lazy val loader = sbtdockerScalaAppBase("loader")("./killrweather-loader")
+lazy val loader = sbtdockerScalaAppBase("fdp-killrweather-event-store-loader")("./killrweather-loader")
   .settings(
     mainClass in Compile := Some("com.lightbend.killrweather.loader.kafka.KafkaDataIngester"),
     libraryDependencies ++= loaders,
@@ -121,7 +121,7 @@ lazy val loader = sbtdockerScalaAppBase("loader")("./killrweather-loader")
   .dependsOn(killrWeatherCore, protobufs)
 
 // Model Server - Real time model scoring - pure scala
-lazy val modelserver = sbtdockerScalaAppBase("modelserverES")("./killrweather-modelserver")
+lazy val modelserver = sbtdockerScalaAppBase("fdp-killrweather-event-store-model-server")("./killrweather-modelserver")
   .settings(
     mainClass in Compile := Some("com.lightbend.killrweather.daily.server.modelserver.AkkaModelServer"),
     libraryDependencies ++= model ++ spark.map(_.withConfigurations(configurations = Option("compile"))),
@@ -133,7 +133,7 @@ lazy val modelserver = sbtdockerScalaAppBase("modelserverES")("./killrweather-mo
   .dependsOn(killrWeatherCore, protobufs)
 
 // Model Listener - Listen to model updates and write them to Kafka - pure scala
-lazy val modelListener = sbtdockerScalaAppBase("modelListenerES")("./killrweather-modellistener")
+lazy val modelListener = sbtdockerScalaAppBase("fdp-killrweather-event-store-model-listener")("./killrweather-modellistener")
   .settings(
     mainClass in Compile := Some("com.lightbend.killrweather.modellistener.TemperaturePredictionModel"),
     libraryDependencies ++= clientHTTP,

@@ -2,8 +2,8 @@
   "id": "/killrweathermodelserver",
   "container": {
     "docker": {
-      "image": "lightbend/modelserver:FDP_VERSION",
-      "forcePull": true,
+      "image": "lightbend/fdp-killrweather-event-store-model-server:FDP_VERSION",
+      "forcePull": true
     }
   },
   "instances": 1,
