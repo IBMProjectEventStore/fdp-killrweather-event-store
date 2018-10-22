@@ -209,7 +209,7 @@ object EventStoreSupport {
   )
 
   def createContext(connectionEndpoints: String, user: String, password: String): Option[EventContext] = {
-    //ConfigurationReader.setUseFrontendConnectionEndpoints(true)
+    ConfigurationReader.setUseFrontendConnectionEndpoints(true)
     ConfigurationReader.setConnectionEndpoints(connectionEndpoints)
     ConfigurationReader.setEventUser(user)
     ConfigurationReader.setEventPassword(password)
@@ -217,11 +217,15 @@ object EventStoreSupport {
       Some(EventContext.createDatabase(eventStoreConfig.database))
     } catch {
       case e: Throwable => {
+        e.printStackTrace()
         try {
           EventContext.openDatabase(eventStoreConfig.database)
           Some(EventContext.getEventContext)
         }catch {
-          case e: Throwable => None
+          case e: Throwable => {
+            e.printStackTrace()
+            None
+          }
         }
       }
     }
