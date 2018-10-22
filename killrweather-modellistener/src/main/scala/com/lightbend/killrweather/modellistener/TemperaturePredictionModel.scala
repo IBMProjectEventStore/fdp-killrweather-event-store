@@ -27,7 +27,7 @@ object TemperaturePredictionModel extends TemperaturePredictionModelResource {
     val settings = WeatherSettings()
     import settings._
 
-    val host = InetAddress.getLocalHost.getHostAddress
+    val host = modelListenerConfig.host
     val port = modelListenerConfig.port
 
     implicit val system = ActorSystem("WeatherDataIngester")

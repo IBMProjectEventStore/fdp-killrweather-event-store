@@ -66,7 +66,7 @@ case class EventStoreTables(
   monthlyPrecipitation: String = "monthly_aggregate_precip"
 )
 
-case class ModelListenerConfig(port : Int = 5000)
+case class ModelListenerConfig(port : Int = 5000, host : String = "localhost")
 
 case class LoaderConfig(publish_interval : String, data_dir : String, batch_size : Int)
 
