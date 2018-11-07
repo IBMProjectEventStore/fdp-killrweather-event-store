@@ -37,16 +37,6 @@ object KillrWeatherEventStore {
 
     // Initialize Event Store
 
-    // Create embedded Kafka and topic
-    if(killrWeatherAppConfig.local) {
-      val kafka = KafkaLocalServer(true)
-      kafka.start()
-      kafka.createTopic(kafkaRawConfig.topic)
-      kafka.createTopic(kafkaDaylyConfig.topic)
-      kafka.createTopic(kafkaModelConfig.topic)
-      println(s"Kafka Cluster created")
-    }
-
     val ctx = EventStoreSupport.createContext(eventStoreConfig.endpoint, eventStoreConfig.user, eventStoreConfig.password)
     ctx.foreach(EventStoreSupport.ensureTables(_))
     println(s"Event Store initialised")

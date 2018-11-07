@@ -1,6 +1,7 @@
 package com.lightbend.killrweather.loader.kafka
 
 
+import com.lightbend.kafka.KafkaLocalServer
 import com.lightbend.killrweather.loader.utils.{DataConvertor, FilesIterator}
 import com.lightbend.killrweather.kafka.MessageSender
 import com.lightbend.killrweather.settings.WeatherSettings
@@ -24,6 +25,16 @@ object KafkaDataIngester {
     val timeInterval = Duration(loaderConfig.publish_interval)
     val batchSize = loaderConfig.batch_size
     println(s"Starting data ingester \n Brokers : $brokers, topic : ${kafkaRawConfig.topic}, directory : $dataDir, timeinterval $timeInterval, batch size $batchSize")
+
+    // Create embedded Kafka and topic
+    if(killrWeatherAppConfig.local) {
+      val kafka = KafkaLocalServer(true)
+      kafka.start()
+      kafka.createTopic(kafkaRawConfig.topic)
+      kafka.createTopic(kafkaDaylyConfig.topic)
+      kafka.createTopic(kafkaModelConfig.topic)
+      println(s"Kafka Cluster created")
+    }
 
     val ingester = KafkaDataIngester(brokers, batchSize, timeInterval)
     ingester.execute(dataDir, kafkaRawConfig.topic)
