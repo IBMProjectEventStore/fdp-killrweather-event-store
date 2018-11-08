@@ -37,57 +37,62 @@ object temperatureML {
     val weatherStations = dfDailyTemp.select("wsid").distinct.collect.flatMap(_.toSeq)
     weatherStations.foreach(println(_))
 
-//    for (weatherStationID <- weatherStations) {
+    for (weatherStationID <- weatherStations) {
 
-    val weatherStationID = weatherStations(0)
+      //val weatherStationID = weatherStations(1)
 
-    val w = org.apache.spark.sql.expressions.Window.orderBy("year", "month", "day")
-    val dfTrain = dfDailyTemp.withColumn("day-1", lag(col("mean"), 1, null).over(w)).
-      withColumn("day-2", lag(col("mean"), 2, null).over(w)).
-      withColumn("day-3", lag(col("mean"), 3, null).over(w))
+      val dfDailyTempstation = dfDailyTemp.filter(s"wsid == $weatherStationID")
+      //    dfDailyTempstation.show(10)
 
-    dfTrain.select("mean", "day-1", "day-2", "day-3").show()
+      val w = org.apache.spark.sql.expressions.Window.orderBy("year", "month", "day")
+      val dfTrain = dfDailyTempstation.withColumn("day-1", lag(col("mean"), 1, null).over(w)).
+        withColumn("day-2", lag(col("mean"), 2, null).over(w)).
+        withColumn("day-3", lag(col("mean"), 3, null).over(w))
 
-    val dfTrain2 = dfTrain.withColumn("day-1", round(col("day-1"), 1)).
-      withColumn("day-2", round(col("day-2"), 1)).
-      withColumn("day-3", round(col("day-3"), 1))
+      dfTrain.select("mean", "day-1", "day-2", "day-3").show()
 
-    val dfTrain3 = dfTrain2.na.drop()
+      val dfTrain2 = dfTrain.withColumn("day-1", round(col("day-1"), 1)).
+        withColumn("day-2", round(col("day-2"), 1)).
+        withColumn("day-3", round(col("day-3"), 1))
 
-    dfTrain3.select("day-1", "day-2", "day-3").show()
+      val dfTrain3 = dfTrain2.na.drop()
 
-    val splits = dfTrain3.randomSplit(Array(0.8, 0.20), seed = 24L)
-    val training_data = splits(0)
-    val test_data = splits(1)
+      dfTrain3.select("day-1", "day-2", "day-3").show()
 
-    val features_assembler = new VectorAssembler().
-      setInputCols(Array("day-1", "day-2", "day-3")).
-      setOutputCol("features")
+      val splits = dfTrain3.randomSplit(Array(0.8, 0.20), seed = 24L)
+      val training_data = splits(0)
+      val test_data = splits(1)
 
-    val lr = new LinearRegression().
-      setMaxIter(50).
-      setRegParam(0.3).
-      setElasticNetParam(0.8).
-      setLabelCol("mean").
-      setFeaturesCol("features")
+      val features_assembler = new VectorAssembler().
+        setInputCols(Array("day-1", "day-2", "day-3")).
+        setOutputCol("features")
 
-    val pipeline = new Pipeline().setStages(Array(features_assembler, lr))
+      val lr = new LinearRegression().
+        setMaxIter(50).
+        setRegParam(0.3).
+        setElasticNetParam(0.8).
+        setLabelCol("mean").
+        setFeaturesCol("features")
 
-    val linearRegressionModel = pipeline.fit(training_data)
+      val pipeline = new Pipeline().setStages(Array(features_assembler, lr))
 
-    val lrModel = linearRegressionModel.stages(1).asInstanceOf[LinearRegressionModel]
-    // Summarize the model over the training set and print out some metrics
-    // Summarize the model over the training set and print out some metrics
-    val summary = lrModel.summary
-    println(s"Total iterations: ${summary.totalIterations}")
-    println(s"Coefficients: ${lrModel.coefficients.toArray.mkString(",")}")
+      val linearRegressionModel = pipeline.fit(training_data)
 
-    val predictions = linearRegressionModel.transform(test_data)
-    predictions.select("prediction").show()
+      val lrModel = linearRegressionModel.stages(1).asInstanceOf[LinearRegressionModel]
+      // Summarize the model over the training set and print out some metrics
+      // Summarize the model over the training set and print out some metrics
+      val summary = lrModel.summary
+      println(s"Total iterations: ${summary.totalIterations}")
+      println(s"Coefficients: ${lrModel.coefficients.toArray.mkString(",")}")
 
-    // PMML
-    val pmml = new PMMLBuilder(training_data.schema, linearRegressionModel).build()
-    MetroJAXBUtil.marshalPMML(pmml, System.out)
+      val predictions = linearRegressionModel.transform(test_data)
+      predictions.select("prediction").show()
+
+      // PMML
+      val pmml = new PMMLBuilder(training_data.schema, linearRegressionModel).build()
+      println(s"PMML for the wither station $weatherStationID")
+      MetroJAXBUtil.marshalPMML(pmml, System.out)
+    }
     sc.stop()
   }
 }
