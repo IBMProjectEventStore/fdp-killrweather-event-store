@@ -1,5 +1,7 @@
 package com.lightbend.killrweather.app
 
+import java.io.ByteArrayOutputStream
+
 import com.ibm.event.common.ConfigurationReader
 import com.lightbend.killrweather.settings.WeatherSettings
 import org.apache.spark.{SparkConf, SparkContext}
@@ -90,8 +92,10 @@ object temperatureML {
 
       // PMML
       val pmml = new PMMLBuilder(training_data.schema, linearRegressionModel).build()
-      println(s"PMML for the wither station $weatherStationID")
-      MetroJAXBUtil.marshalPMML(pmml, System.out)
+      val output = new ByteArrayOutputStream()
+      MetroJAXBUtil.marshalPMML(pmml, output)
+      println(s"PMML for the weather station $weatherStationID")
+      println(new String(output.toByteArray))
     }
     sc.stop()
   }
