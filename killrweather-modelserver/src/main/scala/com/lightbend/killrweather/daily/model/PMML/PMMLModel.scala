@@ -30,6 +30,8 @@ class PMMLModel(inputStream: Array[Byte]) extends Model {
   // Marshall PMML
   val pmml = PMMLUtil.unmarshal(new ByteArrayInputStream(inputStream))
 
+  PMMLB
+
   // Optimize model// Optimize model
   PMMLModel.optimize(pmml)
 

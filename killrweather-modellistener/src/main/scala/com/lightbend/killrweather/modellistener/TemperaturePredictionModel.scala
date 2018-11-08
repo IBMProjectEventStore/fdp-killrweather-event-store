@@ -36,6 +36,8 @@ object TemperaturePredictionModel extends TemperaturePredictionModelResource {
     implicit val executionContext = system.dispatcher
     implicit val timeout = Timeout(10 seconds)
 
+    println(s"Starting MOdel listener on host $host, port $port, publishing to ")
+
     val routes: Route = requestRoutes(new RequestService)
 
     val _ = Http().bindAndHandle(routes, host, port) map {

@@ -36,6 +36,7 @@ object Versions {
   val FicusVersion      = "1.4.3"
 
   val Spark             = "2.1.0" //"2.2.0"
+  val SparkJPPML        = "1.2.13"
   val ScalaPBJSONVersion= "0.3.3"
 
   val PMMLVersion = "1.3.10"
