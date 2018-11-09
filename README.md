@@ -87,3 +87,17 @@ Use the EventStore UI to see the data ingestion in progress.
 
 Monitoring is done using EventStore and Grafana.
 
+## Running locally
+
+In order to run locally, it is necessary first to install Eventstore and Grafana
+1. To install EventStore follow instructions [here](https://github.com/IBMProjectEventStore/db2eventstore-enablement/tree/master/ReactiveSummit2018#installing-ibm-db2-event-store)
+2. To install and configure Grafana follow instructions [here](https://github.com/IBMProjectEventStore/db2eventstore-enablement/tree/master/ReactiveSummit2018#grafana-integration)
+
+Once this is done, the easiest way to run things is through IntelliJ.
+Alternatively, if you want to use straight SBT, use something like command below
+
+````
+sbt '; project appLocalRunner; eval System.setProperty("config.resource", "localWithCluster.conf") ; runMain com.lightbend.killrweather.app.KillrWeatherEventStore'
+````
+
+This is the pattern to run all of the applications

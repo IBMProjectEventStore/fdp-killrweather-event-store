@@ -88,7 +88,9 @@ lazy val killrWeatherApp = sbtdockerSparkAppBase("fdp-killrweather-event-store-a
   .settings(libraryDependencies ++= app)
   .settings (mainClass in Compile := Some("com.lightbend.killrweather.app.KillrWeatherEventStore"))
   .settings(dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-core"  % "2.6.7",
-    dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.7")
+    dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.7",
+    dependencyOverrides +=  "io.netty" % "netty" % "3.8.0.Final"
+  )
   .settings(
     assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false),
     assemblyMergeStrategy in assembly := {
@@ -108,7 +110,8 @@ lazy val appLocalRunner = (project in file("./killrweather-app-local"))
       libraryDependencies ++= spark.map(_.withConfigurations(configurations = Option("compile")))
   )
   .settings(dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-core"  % "2.6.7",
-    dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.7")
+    dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.7",
+    dependencyOverrides +=  "io.netty" % "netty-all" % "4.0.43.Final")
   .dependsOn(killrWeatherApp)
 
 // Loader - loading weather data to Kafka - pure scala

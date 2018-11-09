@@ -3,6 +3,7 @@ package com.lightbend.killrweather.app
 import java.io.ByteArrayOutputStream
 
 import com.ibm.event.common.ConfigurationReader
+import com.ibm.event.oltp.EventContext
 import com.lightbend.killrweather.settings.WeatherSettings
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.ibm.event.EventSession
@@ -44,7 +45,6 @@ object temperatureML {
       //val weatherStationID = weatherStations(1)
 
       val dfDailyTempstation = dfDailyTemp.filter(s"wsid == $weatherStationID")
-      //    dfDailyTempstation.show(10)
 
       val w = org.apache.spark.sql.expressions.Window.orderBy("year", "month", "day")
       val dfTrain = dfDailyTempstation.withColumn("day-1", lag(col("mean"), 1, null).over(w)).
@@ -97,6 +97,7 @@ object temperatureML {
       println(s"PMML for the weather station $weatherStationID")
       println(new String(output.toByteArray))
     }
+    EventContext.cleanUp()
     sc.stop()
   }
 }

@@ -31,6 +31,8 @@ object KillrWeatherEventStore {
     val settings = WeatherSettings()
     import settings._
 
+    println(s"Running Killrweather. Kafka: $kafkaRawConfig; EventStore : $eventStoreConfig" )
+
     // Enable Logging for the Event Store
     //LogManager.getLogger("com.ibm.event").setLevel(Level.DEBUG)
     //LogManager.getLogger("org.apache.spark.sql.ibm.event").setLevel(Level.DEBUG)
