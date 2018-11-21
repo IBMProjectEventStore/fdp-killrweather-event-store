@@ -39,5 +39,5 @@ object Versions {
   val SparkJPPML        = "1.2.13"
   val ScalaPBJSONVersion= "0.3.3"
 
-  val PMMLVersion = "1.3.10"
+  val PMMLVersion       = "1.4.3"
 }
